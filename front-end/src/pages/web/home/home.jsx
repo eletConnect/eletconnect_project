@@ -14,10 +14,7 @@ export default function Home() {
             <Header />
             <section id='section'>
                 <div className="box">
-             
-                    <div className="m-4">
-                        <h1>em desenvolvimento...</h1>
-                    </div>
+ 
                 </div>
             </section>
         </>

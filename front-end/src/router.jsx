@@ -14,7 +14,7 @@ import Eletivas from "./pages/web/eletivas/eletivas";
 import Configuracoes from "./pages/web/configuracoes/settings";
 import EditarPerfil from "./pages/web/configuracoes/componentes/perfil/perfil";
 import EditarSenha from "./pages/web/configuracoes/componentes/seguranca/seguranca";
-import CadastrarInstituicao from "./pages/web/configuracoes/componentes/instituicao/addInstituicao";
+import CadastrarInstituicao from "./pages/web/configuracoes/componentes/instituicao/cadastrarInstituicao";
 import EditarInstituicao from "./pages/web/configuracoes/componentes/instituicao/editarInstituicao";
 import Colaboradores from "./pages/web/configuracoes/componentes/colaboradores/colaboradores";
 
@@ -28,6 +28,8 @@ import Verificacao from "./pages/web/auth/verification";
 // -- Páginas MOBILE --------------------
 import MLogin from "./pages/mobile/auth/login";
 import MForgotPassword from "./pages/mobile/auth/forgotPassword";
+
+import MHome from "./pages/mobile/home/home";
 
 const routers = createBrowserRouter([
     { path: '/', element: <LandingPage /> },
@@ -56,8 +58,10 @@ const routers = createBrowserRouter([
     { path: '/verification', element: <Verificacao /> },
 
     // Páginas MOBILE
-    { path: '/mobile/login', element: <MLogin /> },
-    { path: '/mobile/forgot-password', element: <MForgotPassword /> },
+    { path: '/m/login', element: <MLogin /> },
+    { path: '/m/forgot-password', element: <MForgotPassword /> },
+
+    { path: '/m/home', element: <MHome /> },
 ]);
 
 export default routers;

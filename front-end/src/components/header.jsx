@@ -13,8 +13,9 @@ export default function Header() {
     useEffect(() => {
         if (!user || !escola) {
             window.location.href = '/verification';
-        }
-    }, [user, escola]);
+            console.log('Usuário não autenticado');
+        } 
+    }, []);
 
     // Função para fazer logout do usuário
     const logout = async (e) => {

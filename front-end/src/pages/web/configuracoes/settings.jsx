@@ -6,7 +6,7 @@ export default function Settings() {
     const itemConfigs = [
         { link: '/settings/profile', nome: 'Perfil', icon: 'bi bi-person-badge', modalId: 'modalProfile' },
         { link: '/settings/security', nome: 'Segurança', icon: 'bi bi-shield-lock', modalId: 'modalSecurity' },
-        { link: '/settings/institution', nome: 'Instituição', icon: 'bi bi-house-gear', modalId: 'modalInstitution' },
+        { link: '/settings/institution/edit', nome: 'Instituição', icon: 'bi bi-house-gear', modalId: 'modalInstitution' },
         { link: '/settings/collaborators', nome: 'Colaboradores', icon: 'bi bi-people', modalId: 'modalCollaborators' },
     ];
 
@@ -18,7 +18,7 @@ export default function Settings() {
                 <div className="box">
                     <div className="title">
                         <Link to={'/settings'} className='d-flex align-items-center gap-2 text-black'>
-                            <i className="bi bi-gear fs-3"></i>
+                            <i className="bi bi-gear-fill fs-3"></i>
                             <h3 className='m-0 fs-4'>Configurações</h3>
                         </Link>
                     </div>
@@ -65,7 +65,7 @@ const Modal = ({ id, title, link }) => (
                 <div className="modal-header">
                     <div className="d-flex align-items-center gap-2">
                         <span className='d-flex align-items-center gap-2'>
-                            <i className="bi bi-gear fs-3"></i>
+                            <i className="bi bi-gear-fill fs-3"></i>
                             <h3 className='m-0 fs-4'>Configurações</h3>
                         </span>
                         <i className="bi bi-arrow-right-short fs-4"></i>
