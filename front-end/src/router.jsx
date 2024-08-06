@@ -6,61 +6,58 @@ import PageNotFound from "./pages/web/404";
 
 import Home from "./pages/web/home/home";
 
-import Students from "./pages/web/estudantes/alunos";
-import EditStudents from "./pages/web/estudantes/editarAluno";
-import ViewStudents from "./pages/web/estudantes/visualizarAluno";
+import Aluno from "./pages/web/estudantes/alunos";
+import EditarAluno from "./pages/web/estudantes/editarAluno";
 
 import Eletivas from "./pages/web/eletivas/eletivas";
 
-import Settings from "./pages/web/configuracoes/settings";
-import SettingPerfil from "./pages/web/configuracoes/componentes/perfil/perfil";
-import SettingSegurancao from "./pages/web/configuracoes/componentes/seguranca/seguranca";
-import ADDInstituicao from "./pages/web/configuracoes/componentes/instituicao/addInstituicao"
-import EditInstituicao from "./pages/web/configuracoes/componentes/instituicao/editarInstituicao";
-import SettingColaboradores from "./pages/web/configuracoes/componentes/colaboradores/colaboradores";
+import Configuracoes from "./pages/web/configuracoes/settings";
+import EditarPerfil from "./pages/web/configuracoes/componentes/perfil/perfil";
+import EditarSenha from "./pages/web/configuracoes/componentes/seguranca/seguranca";
+import CadastrarInstituicao from "./pages/web/configuracoes/componentes/instituicao/addInstituicao";
+import EditarInstituicao from "./pages/web/configuracoes/componentes/instituicao/editarInstituicao";
+import Colaboradores from "./pages/web/configuracoes/componentes/colaboradores/colaboradores";
 
 import Login from "./pages/web/auth/Login";
 import Register from "./pages/web/auth/Register";
-import ConfirmRegistration from "./pages/web/auth/confirmRegistration";
-import ForgotPassword from "./pages/web/auth/forgotPassword";
-import ResetPassword from "./pages/web/auth/resetPassword";
-import Verification from "./pages/web/auth/verification";
+import ConfirmarRegistro from "./pages/web/auth/confirmRegistration";
+import EsqueciSenha from "./pages/web/auth/forgotPassword";
+import ResetarSenha from "./pages/web/auth/resetPassword";
+import Verificacao from "./pages/web/auth/verification";
 
-// -- Páginas MOBILE -------------------- 
-import StudentLogin from "./pages/mobile/auth/login";
-import StudentForgotPassword from "./pages/mobile/auth/forgotPassword";
+// -- Páginas MOBILE --------------------
+import MLogin from "./pages/mobile/auth/login";
+import MForgotPassword from "./pages/mobile/auth/forgotPassword";
 
 const routers = createBrowserRouter([
-    // Páginas WEB
     { path: '/', element: <LandingPage /> },
     { path: '*', element: <PageNotFound /> },
 
+    // Páginas WEB
     { path: '/home', element: <Home /> },
 
-    { path: '/students', element: <Students /> },
-    { path: '/edit-student', element: <EditStudents />},
-    { path: '/view-student', element: <ViewStudents />},
+    { path: '/students', element: <Aluno /> },
+    { path: '/edit-student', element: <EditarAluno /> },
 
     { path: '/electives', element: <Eletivas /> },
 
-    { path: '/settings', element: <Settings /> },
-    { path: '/settings/profile', element: <SettingPerfil /> },
-    { path: '/settings/security', element: <SettingSegurancao />},
-    { path: '/settings/institution', element: <EditInstituicao />},
-    { path: '/institution', element: <ADDInstituicao /> },
-    { path: '/settings/collaborators', element: <SettingColaboradores />},
-
+    { path: '/settings', element: <Configuracoes /> },
+    { path: '/settings/profile', element: <EditarPerfil /> },
+    { path: '/settings/security', element: <EditarSenha /> },
+    { path: '/settings/institution', element: <CadastrarInstituicao /> },
+    { path: '/settings/institution/edit', element: <EditarInstituicao /> },
+    { path: '/settings/collaborators', element: <Colaboradores /> },
 
     { path: '/login', element: <Login /> },
     { path: '/register', element: <Register /> },
-    { path: '/confirm-registration', element: <ConfirmRegistration /> },
-    { path: '/forgot-password', element: <ForgotPassword /> },
-    { path: '/reset-password', element: <ResetPassword /> },
-    { path: '/verification', element: <Verification /> },
+    { path: '/confirm-registration', element: <ConfirmarRegistro /> },
+    { path: '/forgot-password', element: <EsqueciSenha /> },
+    { path: '/reset-password', element: <ResetarSenha /> },
+    { path: '/verification', element: <Verificacao /> },
 
     // Páginas MOBILE
-    { path: '/mobile/login', element: <StudentLogin /> },
-    { path: '/mobile/forgot-password', element: <StudentForgotPassword /> },
+    { path: '/mobile/login', element: <MLogin /> },
+    { path: '/mobile/forgot-password', element: <MForgotPassword /> },
 ]);
 
 export default routers;
