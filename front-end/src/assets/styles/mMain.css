@@ -1,0 +1,138 @@
+/* Global styles */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+#Mbody {
+    background-color: #0a2558 !important;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    line-height: 1.5;
+    overflow-x: hidden;
+}
+
+/* Header Styles */
+#mheader {
+    background-color: #0a2558;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 5em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 12000;
+}
+
+.header-content {
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 1rem;
+}
+
+
+/* Main Styles */
+#mMain {
+    background-color: white;
+    position: relative;
+    top: 5em;
+    height: calc(100vh - 5em - 5em);
+    overflow-y: auto;
+    border-radius: 2.5em 2.6em 0 0;
+}
+
+.carousel-inner {
+    height: 100%;
+}
+
+.carousel-item p {
+    font-size: 1.5rem;
+    padding: 2rem 0;
+}
+
+/* Footer Styles */
+#mFooter {
+    background-color: whitesmoke;
+    position: fixed;
+    width: 100%;
+    height: 5em;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.footer-menu {
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 1rem;
+}
+
+.footer-menu li {
+    list-style: none;
+}
+
+.footer-menu a {
+    text-decoration: none;
+    color: #0a2558;
+}
+
+.footer-menu .active {
+    font-weight: bold;
+}
+
+.cor-menu {
+    background-color: #0a2558;
+    width: 4em;
+    height: 4em;
+}
+
+.menu-overlay {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: fixed;
+    top: 6em;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 6em - 8vh);
+    background-color: white;
+    z-index: -1;
+    transform: translateX(-100%); /* Inicialmente fora da tela à esquerda */
+    transition: transform 0.5s ease-in;
+}
+
+.menu-overlay.show {
+    transform: translateX(0); /* Traz o menu para dentro da tela */
+}
+
+
+.menu-overlay .footer-menu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1em;
+    flex-wrap: wrap;
+}
+
+.menu-overlay .footer-menu li {
+    padding: 0.5em;
+    height: 8em;
+    width: 8em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #0a2558;
+}
+
+.menu-overlay .footer-menu i {
+    font-size: 3em;
+    color: #0a2558;
+}
