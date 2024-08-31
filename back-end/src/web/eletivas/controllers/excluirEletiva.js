@@ -23,42 +23,41 @@ exports.excluirEletiva = async (request, response) => {
             return response.status(500).json({ mensagem: 'Erro ao buscar alunos matriculados', detalhe: alunosError.message });
         }
 
-        if (!alunosData || alunosData.length === 0) {
-            console.warn('Nenhum aluno encontrado para a eletiva:', { codigo, instituicao });
-            return response.status(404).json({ mensagem: 'Nenhum aluno encontrado para a eletiva' });
-        }
-
-        // Desmatricular cada aluno usando a função existente
-        for (const aluno of alunosData) {
-            const desmatriculaRequest = {
-                body: {
-                    matricula: aluno.matricula_aluno,
-                    codigo,
-                    tipo, // Tipo fornecido diretamente
-                    instituicao,
-                }
-            };
-
-            const desmatriculaResponse = {
-                status: (statusCode) => ({
-                    json: (jsonData) => {
-                        if (statusCode >= 400) {
-                            console.error(`Erro ao desmatricular o aluno ${aluno.matricula_aluno}:`, jsonData);
-                            throw new Error(jsonData.mensagem || 'Erro desconhecido na desmatrícula');
-                        }
+        // Desmatricular cada aluno, se houver alunos matriculados
+        if (alunosData && alunosData.length > 0) {
+            for (const aluno of alunosData) {
+                const desmatriculaRequest = {
+                    body: {
+                        matricula: aluno.matricula_aluno,
+                        codigo,
+                        tipo, // Tipo fornecido diretamente
+                        instituicao,
                     }
-                })
-            };
+                };
 
-            try {
-                await desmatricularAluno(desmatriculaRequest, desmatriculaResponse);
-            } catch (desmatriculaError) {
-                console.error(`Erro ao desmatricular o aluno ${aluno.matricula_aluno}:`, desmatriculaError);
-                return response.status(500).json({ mensagem: `Erro ao desmatricular o aluno ${aluno.matricula_aluno}`, detalhe: desmatriculaError.message });
+                const desmatriculaResponse = {
+                    status: (statusCode) => ({
+                        json: (jsonData) => {
+                            if (statusCode >= 400) {
+                                console.error(`Erro ao desmatricular o aluno ${aluno.matricula_aluno}:`, jsonData);
+                                throw new Error(jsonData.mensagem || 'Erro desconhecido na desmatrícula');
+                            }
+                        }
+                    })
+                };
+
+                try {
+                    await desmatricularAluno(desmatriculaRequest, desmatriculaResponse);
+                } catch (desmatriculaError) {
+                    console.error(`Erro ao desmatricular o aluno ${aluno.matricula_aluno}:`, desmatriculaError);
+                    return response.status(500).json({ mensagem: `Erro ao desmatricular o aluno ${aluno.matricula_aluno}`, detalhe: desmatriculaError.message });
+                }
             }
+        } else {
+            console.warn('Nenhum aluno matriculado encontrado para a eletiva:', { codigo, instituicao });
         }
 
-        // Depois, excluir a eletiva
+        // Excluir a eletiva
         const { error: eletivaError } = await supabase
             .from('eletivas')
             .delete()
@@ -69,7 +68,7 @@ exports.excluirEletiva = async (request, response) => {
             return response.status(500).json({ mensagem: 'Erro ao excluir a eletiva', detalhe: eletivaError.message });
         }
 
-        return response.status(200).json({ mensagem: 'Eletiva excluída e alunos desmatriculados com sucesso' });
+        return response.status(200).json({ mensagem: 'Eletiva excluída com sucesso' });
     } catch (error) {
         console.error('Erro inesperado ao excluir a eletiva:', error);
         return response.status(500).json({ mensagem: 'Erro interno ao excluir a eletiva', detalhe: error.message });

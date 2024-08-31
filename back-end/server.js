@@ -2,11 +2,11 @@ require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 const morgan = require('morgan');
 const cors = require('cors');
 const path = require('path');
 const os = require('os');
-const fs = require('fs'); // Importando o módulo fs para usar existsSync
 
 const app = express();
 
@@ -26,13 +26,15 @@ function obterEnderecoIPLocal() {
   return '127.0.0.1';
 }
 
-// Configuração do CORS
 const IPLocal = obterEnderecoIPLocal();
+console.log('Endereço IP local:', IPLocal);
+
+// Configuração do CORS
 app.use(cors({
   origin: [
     'http://localhost:5173',
     `http://${IPLocal}:5173`,
-  ],
+  ], // Permitir todas as origens para desenvolvimento
   credentials: true,
 }));
 
@@ -41,22 +43,23 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
-// Limitação de requisições por IP - menos restritiva no desenvolvimento
-const limitadorStatus = rateLimit({
+// Segurança básica com cabeçalhos HTTP
+app.use(helmet());
+
+// Limitação de requisições por IP para prevenir abusos
+const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
   max: 1000,
 });
+app.use(limiter);
 
-// Aplicando rate limiter no endpoint de status apenas
-app.use('/status', limitadorStatus);
-
-// Configuração da sessão usando o armazenamento padrão na memória
+// Configuração da sessão
 app.use(session({
   secret: process.env.SESSION_SECRET || 'segredo-padrao',
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: {
-    secure: false, // Desativado para desenvolvimento em HTTP
+    secure: false, // `false` para desenvolvimento em HTTP
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 horas
   },
@@ -64,17 +67,12 @@ app.use(session({
 
 // Log da sessão para depuração
 app.use((req, res, next) => {
-  console.log('Sessão:', req.session); // Logando a sessão para verificar se está sendo criada corretamente
+  console.log('Sessão:', req.session);
   next();
 });
 
 // Servir arquivos estáticos da build do React
-const staticPath = path.join(__dirname, 'client', 'dist');
-if (fs.existsSync(staticPath)) {
-  app.use(express.static(staticPath));
-} else {
-  console.error('Caminho para arquivos estáticos não encontrado:', staticPath);
-}
+app.use(express.static(path.join(__dirname, 'client', 'dist')));
 
 // Endpoint de status
 app.get('/status', (req, res) => {
@@ -89,20 +87,15 @@ app.use(require('./src/routes'));
 
 // Rota para servir o index.html para qualquer outra rota (para compatibilidade com o React Router)
 app.get('*', (req, res) => {
-  const indexPath = path.join(__dirname, 'client', 'dist', 'index.html');
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    res.status(404).send('index.html não encontrado.');
-  }
+  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
 });
 
 // Tratamento de erros
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Erro:', err.stack);
   res.status(err.status || 500).json({
-    erro: {
-      mensagem: err.message,
+    error: {
+      message: err.message,
       ...(process.env.NODE_ENV === 'development' ? { stack: err.stack } : {}),
     },
   });
@@ -110,6 +103,5 @@ app.use((err, req, res, next) => {
 
 // Inicialização do servidor
 app.listen(PORT, HOST, () => {
-  const IPLocal = obterEnderecoIPLocal();
   console.log(`Servidor rodando em http://${IPLocal}:${PORT} (ou http://localhost:${PORT})`);
 });

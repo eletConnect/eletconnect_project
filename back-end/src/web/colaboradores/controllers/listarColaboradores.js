@@ -1,26 +1,29 @@
-exports.listarColaboradores = async (request, response) => {
-    try {
-        // Verifica se há uma sessão ativa e se os dados do usuário estão presentes
-        if (request.session && request.session.user) {
-            const { id, matricula, nome, email, avatar, cargo, status, instituicao } = request.session.user;
+const supabase = require('../../../configs/supabase');
 
-            // Retorna os dados do usuário na resposta
-            return response.status(200).json({
-                id,
-                matricula,
-                nome,
-                email,
-                avatar,
-                cargo,
-                status,
-                instituicao
-            });
-        } else {
-            // Retorna erro se não houver sessão ativa
-            return response.status(401).json({ mensagem: 'Nenhuma sessão ativa foi encontrada.' });
+exports.listarColaboradores = async (request, response) => {
+    const { instituicao } = request.body;
+    console.log('Listando colaboradores:', { instituicao });
+
+    if (!instituicao) {
+        return response.status(400).json({ mensagem: 'Instituição não informada' });
+    }
+
+    try {
+        const { data: colaboradoresData, error: colaboradoresError } = await supabase
+            .from('usuarios')
+            .select('*')
+            .eq('instituicao', instituicao);
+
+        if (colaboradoresError) {
+            return response.status(500).json({ mensagem: 'Erro ao listar os colaboradores', detalhe: colaboradoresError.message });
         }
+
+        if (!colaboradoresData || colaboradoresData.length === 0) {
+            return response.status(404).json({ mensagem: 'Nenhum colaborador encontrado' });
+        }
+
+        return response.status(200).json({ colaboradoresData });
     } catch (error) {
-        console.error('[Colaboradores: listar]', error.message);
-        return response.status(500).json({ mensagem: 'Erro ao tentar listar os colaboradores.' });
+        return response.status(500).json({ mensagem: 'Erro ao listar os colaboradores', detalhe: error.message });
     }
 };
