@@ -139,7 +139,7 @@ export default function EditarColaborador({ matricula }) {
     return (
         <>
             <div id='toast-container' className="toast-container position-fixed bottom-0 end-0 p-3"></div>
-            <div className="box p-4">
+            <div className="p-4">
                 <div className='d-flex gap-4'>
                     <div className="d-flex flex-column align-items-center gap-3">
                         <img width={150} height={200} src={dadosColaborador.fotoUrl} alt="Foto do colaborador" className="img-thumbnail" />
@@ -153,15 +153,7 @@ export default function EditarColaborador({ matricula }) {
                             </div>
                             <div className="col-md-4">
                                 <label htmlFor="cargo" className="form-label">Cargo <span className="text-danger">*</span></label>
-                                <select
-                                    className="form-select"
-                                    id="cargo"
-                                    name="cargo"
-                                    value={dadosColaborador.cargo}
-                                    onChange={(e) => setDadosColaborador({ ...dadosColaborador, cargo: e.target.value })}
-                                    required
-                                    disabled={eMeuPerfil} // Desabilita se o usuário estiver editando seu próprio perfil
-                                >
+                                <select className="form-select" id="cargo" name="cargo" value={dadosColaborador.cargo} onChange={(e) => setDadosColaborador({ ...dadosColaborador, cargo: e.target.value })} required disabled={eMeuPerfil} >
                                     <option value="" disabled>Selecione...</option>
                                     <option value="Diretor">Diretor</option>
                                     <option value="Coordenador">Coordenador</option>
@@ -171,44 +163,20 @@ export default function EditarColaborador({ matricula }) {
                             </div>
                             <div className="col-md-4">
                                 <label htmlFor="status" className="form-label">Status <span className="text-danger">*</span></label>
-                                <select
-                                    className="form-select"
-                                    id="status"
-                                    name="status"
-                                    value={dadosColaborador.status}
-                                    onChange={(e) => setDadosColaborador({ ...dadosColaborador, status: e.target.value })}
-                                    required
-                                    disabled={eMeuPerfil} // Desabilita se o usuário estiver editando seu próprio perfil
-                                >
+                                <select className="form-select" id="status" name="status" value={dadosColaborador.status} onChange={(e) => setDadosColaborador({ ...dadosColaborador, status: e.target.value })} required disabled={eMeuPerfil}  >
                                     <option value="Ativo">Ativo</option>
                                     <option value="Inativo">Inativo</option>
                                 </select>
                             </div>
                             <div className="col-md-6">
                                 <label htmlFor="nome" className="form-label">Nome completo <span className="text-danger">*</span></label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    id="nome"
-                                    name="nome"
-                                    value={dadosColaborador.nome}
-                                    onChange={(e) => setDadosColaborador({ ...dadosColaborador, nome: e.target.value })}
-                                    required
-                                />
+                                <input type="text" className="form-control" id="nome" name="nome" value={dadosColaborador.nome} onChange={(e) => setDadosColaborador({ ...dadosColaborador, nome: e.target.value })} required />
                             </div>
                             <div className="col-md-6">
                                 <label htmlFor="email" className="form-label">E-mail</label>
-                                <input
-                                    type="email"
-                                    className="form-control"
-                                    id="email"
-                                    name="email"
-                                    value={dadosColaborador.email}
-                                    onChange={(e) => setDadosColaborador({ ...dadosColaborador, email: e.target.value })}
-                                    disabled={eMeuPerfil} // Desabilita se o usuário estiver editando seu próprio perfil
-                                />
+                                <input type="email" className="form-control" id="email" name="email" value={dadosColaborador.email} onChange={(e) => setDadosColaborador({ ...dadosColaborador, email: e.target.value })} disabled={eMeuPerfil} />
                             </div>
-                            <div className="text-end mt-4">
+                            <div className="text-end mt-5">
                                 <button className='btn btn-success' type="submit" disabled={carregando}>
                                     <i className="bi bi-pencil">&ensp;</i>{carregando ? 'Editando...' : 'Editar'}
                                 </button>

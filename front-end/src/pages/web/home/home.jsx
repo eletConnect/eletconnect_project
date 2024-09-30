@@ -98,8 +98,11 @@ export default function Home() {
             <Header />
             <section id='section'>
                 <div className="box">
-                    <div className="title d-flex justify-content-between align-items-center">
-                        <h3 className="m-0 fs-4">CEM 03 de Taguatinga</h3>
+                    <div className="title">
+                        <span className="d-flex align-items-center gap-2">
+                            <img className='image-school' width={50} src={escola?.logotipo || ""} alt="" />
+                            <h3 className="m-0 fs-4">CEM 03 de Taguatinga</h3>
+                        </span>
                     </div>
 
                     <div className="p-4">
@@ -114,37 +117,48 @@ export default function Home() {
 
                                 <div className="d-flex flex-grap gap-4 mb-2">
                                     <div className="card text-center shadow-sm border-left-primary">
-                                        <div className="card-body d-flex align-items-center gap-4">
+                                        <div className="card-body d-flex align-items-center gap-5">
                                             <span>
-                                                <h5 className="card-title text-primary">Total de alunos</h5>
-                                                <p className="card-text">{totalAlunos} alunos</p>
+                                                <p className="card-title text-primary m-0"><small>Total de alunos</small></p>
+                                                <p className="card-text text-start">{totalAlunos} alunos</p>
                                             </span>
                                             <Link to={'/students'}>
-                                                <i className="bi bi-person-arms-up fs-1"></i>
+                                                <i className="bi bi-person-arms-up fs-1 opacity-75"></i>
                                             </Link>
                                         </div>
                                     </div>
-                                    <div className="card text-center shadow-sm border-left-primary">
-                                        <div className="card-body d-flex align-items-center gap-4">
+                                    <div className="card text-center shadow-sm border-left-success">
+                                        <div className="card-body d-flex align-items-center gap-5">
                                             <span>
-                                                <h5 className="card-title text-primary">Total de eletivas</h5>
-                                                <p className="card-text">{totalEletivas} eletivas</p>
+                                                <p className="card-title text-success m-0"><small>Total de eletivas</small></p>
+                                                <p className="card-text text-start">{totalEletivas} eletivas</p>
                                             </span>
                                             <Link to={'/electives'}>
-                                                <i className="bi bi-bookmark-star-fill fs-1"></i>
+                                                <i className="bi bi-bookmark-star-fill fs-1 text-success opacity-75"></i>
+                                            </Link>
+                                        </div>
+                                    </div>
+                                    <div className="card text-center shadow-sm border-left-danger">
+                                        <div className="card-body d-flex align-items-center gap-5">
+                                            <span>
+                                                <p className="card-title text-danger m-0"><small>Alunos matriculados em eletivas</small></p>
+                                                <p className="card-text text-start">1 Alunos</p>
+                                            </span>
+                                            <Link to={'/electives'}>
+                                                <i className="bi bi-bookmark-star-fill fs-1 text-danger opacity-75"></i>
                                             </Link>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Gráficos */}
-                                <div className="row ">
+                                <div className="row">
                                     <div className="col-md-4">
-                                        <div className="card shadow-sm border-left-secondary">
-                                            <div className="card-body">
-                                                <p className="m-0">Alunos matriculados em eletivas por série.</p>
-                                                <Chart type="bar" data={chartData} options={chartOptions} />
+                                        <div className="border shadow-sm">
+                                            <div className="p-2 bg-body-tertiary">
+                                                <h5 className="m-0">Alunos matriculados em eletivas</h5>
                                             </div>
+                                            <Chart className="p-1" type="bar" data={chartData} options={chartOptions} />
                                         </div>
                                     </div>
                                 </div>

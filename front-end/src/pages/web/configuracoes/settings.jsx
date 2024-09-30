@@ -4,7 +4,6 @@ import Header from "../../../components/header";
 import EditarPerfil from "./perfil/perfil";
 import EditarSenha from "../auth/changePassword";
 import EditarInstituicao from "./instituicao/editarInstituicao";
-import Permissoes from "./permissoes/permissoes";
 
 export default function Settings() {
     const [modalContent, setModalContent] = useState(null);
@@ -95,7 +94,7 @@ const Modal = ({ content, title }) => (
                     </div>
                     <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div className="modal-body">
+                <div className="m-4">
                     {content}
                 </div>
             </div>

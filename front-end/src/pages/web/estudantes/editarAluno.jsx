@@ -15,7 +15,8 @@ export default function EditarAluno({ matricula }) {
         foto: null,
         fotoUrl: '',
     });
-    const [carregando, setCarregando] = useState(true);
+    const [carregando, setCarregando] = useState(true); // Estado de carregamento geral
+    const [carregandoEletivas, setCarregandoEletivas] = useState(false); // Carregamento das eletivas
     const [eletivasAluno, setEletivasAluno] = useState([]);
     const [salvando, setSalvando] = useState(false);
 
@@ -54,12 +55,13 @@ export default function EditarAluno({ matricula }) {
         } catch (erro) {
             showToast('danger', 'Erro ao buscar dados do aluno.');
         } finally {
-            setCarregando(false);
+            setCarregando(false); // Aluno carregado
         }
     };
 
     const carregarEletivasAluno = async () => {
         try {
+            setCarregandoEletivas(true); // Inicia carregamento das eletivas
             const resposta = await axios.post(`/eletivas/listar-eletivas-aluno`, { matricula, instituicao: dadosAluno.instituicao });
             if (resposta.status === 200 && Array.isArray(resposta.data)) {
                 setEletivasAluno(resposta.data);
@@ -68,6 +70,8 @@ export default function EditarAluno({ matricula }) {
             }
         } catch (erro) {
             showToast('danger', 'Erro ao buscar as eletivas do aluno');
+        } finally {
+            setCarregandoEletivas(false); // Finaliza carregamento das eletivas
         }
     };
 
@@ -154,11 +158,14 @@ export default function EditarAluno({ matricula }) {
         return classes[tipo] || classes['default'];
     };
 
+    // Carregamento completo
+
+
     return (
         <>
             <div id="toast-container" className="toast-container position-absolute bottom-0 start-50 translate-middle-x"></div>
-            <div className="box">
-                {carregando ? (
+            <div className="p-4">
+                {(carregando || carregandoEletivas) ? ( // Exibe o spinner até que todos os dados estejam carregados
                     <div className="d-flex justify-content-center my-5">
                         <div className="spinner-border text-primary" role="status">
                             <span className="visually-hidden">Carregando...</span>
@@ -172,11 +179,11 @@ export default function EditarAluno({ matricula }) {
                         </div>
                         <div className="w-75">
                             <form className="row g-3">
-                                <div className="col-md-4">
+                                <div className="col-md-3">
                                     <label htmlFor="matricula" className="form-label">Matrícula <span className="text-danger">*</span></label>
                                     <input type="text" className="form-control" id="matricula" value={dadosAluno.matricula} onChange={(e) => setDadosAluno({ ...dadosAluno, matricula: e.target.value })} required />
                                 </div>
-                                <div className="col-md-2">
+                                <div className="col-md-3">
                                     <label htmlFor="serie" className="form-label">Série <span className="text-danger">*</span></label>
                                     <select className="form-select" id="serie" value={dadosAluno.serie} onChange={(e) => setDadosAluno({ ...dadosAluno, serie: e.target.value })} required >
                                         <option value="" disabled>Selecione...</option>
@@ -185,8 +192,7 @@ export default function EditarAluno({ matricula }) {
                                         <option value="3º ano">3º ano</option>
                                     </select>
                                 </div>
-                                <div className="col-md-2">
-
+                                <div className="col-md-3">
                                     <label htmlFor="turma" className="form-label">Turma <span className="text-danger">*</span></label>
                                     <select className="form-select" id="turma" value={dadosAluno.turma} onChange={(e) => setDadosAluno({ ...dadosAluno, turma: e.target.value })} required>
                                         <option value="" disabled>Selecione...</option>
@@ -194,7 +200,6 @@ export default function EditarAluno({ matricula }) {
                                             <option key={turma} value={turma}>{turma}</option>
                                         ))}
                                     </select>
-
                                 </div>
                                 <div className="col-md-3">
                                     <label htmlFor="status" className="form-label">Status</label>
@@ -213,6 +218,7 @@ export default function EditarAluno({ matricula }) {
                                     <input type="email" className="form-control" id="email" value={dadosAluno.email} onChange={(e) => setDadosAluno({ ...dadosAluno, email: e.target.value })} />
                                 </div>
                             </form>
+
                             <h5 className="mt-4">| Eletivas</h5>
                             <div>
                                 {eletivasAluno.length > 0 ? (
@@ -228,7 +234,8 @@ export default function EditarAluno({ matricula }) {
                         </div>
                     </div>
                 )}
-                {!carregando && (
+
+                {!carregando && !carregandoEletivas && ( // Botão de salvar visível apenas quando não estiver carregando
                     <div className="text-end">
                         <button className="btn btn-success" onClick={aoSalvar} disabled={salvando}>
                             <i className='bi bi-pencil-fill'></i>&ensp;{salvando ? 'Editando...' : 'Editar'}

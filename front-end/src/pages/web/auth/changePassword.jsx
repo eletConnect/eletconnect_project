@@ -51,7 +51,7 @@ export default function Home() {
     return (
         <>
             <div id='toast-container' className="toast-container position-absolute bottom-0 start-50 translate-middle-x p-3"></div>
-            <form onSubmit={alterarSenha} className='m-4' style={{ height: 'auto' }}>
+            <form onSubmit={alterarSenha}>
                 {/* Campo de nome de usuário oculto */}
                 <input type="text" name="username" value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" style={{ display: 'none' }} />
                 <div className="mb-3">

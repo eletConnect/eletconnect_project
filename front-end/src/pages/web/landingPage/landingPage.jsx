@@ -1,11 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { isMobile } from 'react-device-detect';
+import emailjs from '@emailjs/browser';
 
 import "./landingPage.css";
 import logo from '../../../assets/images/logo/azul.png';
 import imgSelect from '../../../assets/images/Digital transformation-cuate.png';
 
 export default function LandingPage() {
+    const [nome, setNome] = useState('');
+    const [email, setEmail] = useState('');
+    const [mensagem, setMensagem] = useState('');
+
+    // Função para enviar o email via EmailJS
+    const enviarEmail = (e) => {
+        e.preventDefault();
+
+        const templateParams = {
+            from_name: nome,
+            from_email: email,
+            message: mensagem,
+        };
+
+        emailjs.send('service_penom2m', 'template_gp9c4bv', templateParams, 'sFI71YOCUv276jh3s')
+            .then((response) => {
+                alert('Mensagem enviada com sucesso!');
+                // Limpa o formulário
+                setNome('');
+                setEmail('');
+                setMensagem('');
+            })
+            .catch((error) => {
+                alert('Erro ao enviar mensagem. Tente novamente mais tarde.');
+            });
+    };
+
     return (
         <>
             <nav className="navbar fixed-top bg-body-tertiary">
@@ -23,7 +51,7 @@ export default function LandingPage() {
                                 <a className="nav-link text-black" href="#clientes"><p className='m-0'>CLIENTES</p></a>
                             </li>
                             <li className="nav-item">
-                                <a className="nav-link text-black" href="#contato"><p className='m-0'>CONTATO</p></a>
+                                <button className="nav-link text-black " data-bs-toggle="modal" data-bs-target="#contato"><p className='m-0'>CONTATO</p></button>
                             </li>
                         </ul>
                         <a className="btn btn-primary" href={isMobile ? "/m/login" : "/login"}>
@@ -77,6 +105,62 @@ export default function LandingPage() {
                     </div>
                 </section>
             </main>
+
+            {/* Modal de contato */}
+            <div className="modal fade" id="contato" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h1 className="modal-title fs-5" id="exampleModalLabel">Formulário de Contato</h1>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <form id="formContato" onSubmit={enviarEmail}>
+                                <div className="mb-3">
+                                    <label htmlFor="nome" className="form-label">Nome</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="nome"
+                                        placeholder="Seu nome"
+                                        value={nome}
+                                        onChange={(e) => setNome(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="email" className="form-label">Email</label>
+                                    <input
+                                        type="email"
+                                        className="form-control"
+                                        id="email"
+                                        placeholder="seuemail@exemplo.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="mensagem" className="form-label">Mensagem</label>
+                                    <textarea
+                                        className="form-control"
+                                        id="mensagem"
+                                        rows="3"
+                                        placeholder="Sua mensagem"
+                                        value={mensagem}
+                                        onChange={(e) => setMensagem(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </form>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                            <button type="submit" form="formContato" className="btn btn-primary">Enviar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </>
     );
 }

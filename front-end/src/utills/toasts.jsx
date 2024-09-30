@@ -1,4 +1,4 @@
-export default function showToast(type, message) {
+export default function showToast(type, message, duration = 4000) {
     const toastContainer = document.getElementById('toast-container');
     if (!toastContainer) {
         console.error(`[eletConnect]: O container de toasts com o id 'toast-container' não foi encontrado. Certifique-se de que ele existe no seu HTML.`);
@@ -37,6 +37,6 @@ export default function showToast(type, message) {
         toastElement.classList.remove('show');
         setTimeout(() => {
             toastContainer.removeChild(toastElement);
-        }, 300); // Tempo para coincidir com a duração da transição CSS
-    }, 4000);
+        }, 400); // Tempo para coincidir com a duração da transição CSS
+    }, duration);
 }

@@ -121,7 +121,7 @@ export default function MHome() {
                 ) : (
                     <>
                         <div id='toast-container' className="toast-container position-absolute bottom-0 start-50 translate-middle-x mb-2"></div>
-                        <div className='p-3'>
+                        <div className='p-2'>
                             <ul className='d-flex justify-content-evenly align-items-center'>
                                 <li className='btn btn-sm text-decoration-underline'>{qnts.qnt_projetoVida}/{limites['Projeto de Vida']} Projeto de Vida</li>
                                 {exibirAbaTrilha && (

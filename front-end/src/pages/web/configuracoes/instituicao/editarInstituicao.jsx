@@ -86,7 +86,7 @@ export default function SettingsInstituicao() {
     return (
         <>
             <div id='toast-container' className="toast-container position-absolute bottom-0 start-50 translate-middle-x p-3"></div>
-            <div className="m-4 d-flex gap-4">
+            <div className="d-flex gap-4">
                 <div className="d-flex flex-column align-items-center gap-3">
                     <img width={250} src={logotipoUrl || 'https://via.placeholder.com/150'} alt="Logo da instituição" />
                     <input type="file" onChange={alterarLogotipo} />
@@ -101,21 +101,21 @@ export default function SettingsInstituicao() {
                             <label className="form-label">CNPJ</label>
                             <input type="text" className="form-control" value={escola?.cnpj} disabled />
                         </div>
-                        <div className="col-12">
+                        <div className="col-9">
                             <label className="form-label">Nome da instituição</label>
                             <input type="text" className="form-control" value={eNome} onChange={(e) => setENome(e.target.value)} />
                         </div>
-                        <div className="col-md-6">
+                        <div className="col-3">
+                            <label className="form-label">Telefone (+55)</label>
+                            <input type="text" className="form-control" value={eTelefone} onChange={(e) => setETelefone(e.target.value)} />
+                        </div>
+                        <div className="col-md-3">
                             <label className="form-label">CEP</label>
                             <input type="text" className="form-control" value={eCep} onChange={(e) => setECEP(e.target.value)} onBlur={() => verificarCEP(eCep)} />
                         </div>
-                        <div className="col-md-6">
+                        <div className="col-md-9">
                             <label className="form-label">Endereço</label>
                             <input type="text" className="form-control" value={eEndereco} onChange={(e) => setEEndereco(e.target.value)} />
-                        </div>
-                        <div className="col-12">
-                            <label className="form-label">Telefone (+55)</label>
-                            <input type="text" className="form-control" value={eTelefone} onChange={(e) => setETelefone(e.target.value)} />
                         </div>
                         <div className="text-end mt-4">
                             <button type='submit' className="btn btn-success" disabled={loading}>

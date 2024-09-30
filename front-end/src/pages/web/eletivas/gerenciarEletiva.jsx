@@ -4,6 +4,7 @@ import axios from '../../../configs/axios';
 import Header from '../../../components/header';
 import showToast from '../../../utills/toasts';
 import EditarEletiva from './editarEletiva';
+import '../../../assets/styles/my-bootstrap.css';
 
 export default function GerenciarEletiva() {
     const [searchParams] = useSearchParams();
@@ -14,10 +15,10 @@ export default function GerenciarEletiva() {
     const [carregando, setCarregando] = useState({ geral: true, modal: false });
     const [eletiva, setEletiva] = useState({});
     const [alunosMatriculados, setAlunosMatriculados] = useState([]);
-    const [todosAlunosMatriculados, setTodosAlunosMatriculados] = useState([]);
     const [todosAlunos, setTodosAlunos] = useState([]);
     const [busca, setBusca] = useState({ termo: '', termoMatricula: '' });
     const [alunoSelecionado, setAlunoSelecionado] = useState({ matricula: '', nome: '' });
+    const [mostrarOutrasTurmas, setMostrarOutrasTurmas] = useState(false);
 
     useEffect(() => {
         if (!codigoEletiva) {
@@ -40,6 +41,12 @@ export default function GerenciarEletiva() {
         carregarDadosEletiva();
     }, [codigoEletiva]);
 
+    useEffect(() => {
+        if (user && eletiva) {
+            listarTodosAlunos();
+        }
+    }, [mostrarOutrasTurmas, eletiva]);
+
     const buscarDetalhesEletiva = async (user) => {
         try {
             const { data } = await axios.post('/eletivas/buscar', { instituicao: user.instituicao, codigo: codigoEletiva });
@@ -58,7 +65,6 @@ export default function GerenciarEletiva() {
         try {
             const { data } = await axios.post('/eletivas/listar-alunos-eletiva', { instituicao: user.instituicao, codigo: codigoEletiva });
             setAlunosMatriculados(data || []);
-            setTodosAlunosMatriculados(data || []);
         } catch (error) {
             showToast('danger', 'Erro ao listar alunos da eletiva.');
         }
@@ -73,82 +79,19 @@ export default function GerenciarEletiva() {
         try {
             setCarregando(prev => ({ ...prev, modal: true }));
             const { data } = await axios.post('/estudantes/listar', { instituicao: user.instituicao });
+
             if (data?.alunosData) {
-                const alunosNaoMatriculados = data.alunosData.filter(
-                    aluno => !alunosMatriculados.some(a => a.matricula === aluno.matricula)
-                );
-                setTodosAlunos(alunosNaoMatriculados);
+                let alunosDisponiveis = data.alunosData.filter(aluno => !alunosMatriculados.some(a => a.matricula === aluno.matricula));
+                if (eletiva.exclusiva && !mostrarOutrasTurmas) {
+                    alunosDisponiveis = alunosDisponiveis.filter(aluno => aluno.serie === eletiva.serie && aluno.turma === eletiva.turma);
+                }
+
+                setTodosAlunos(alunosDisponiveis);
             }
         } catch (error) {
             showToast('danger', 'Erro ao listar alunos.');
         } finally {
             setCarregando(prev => ({ ...prev, modal: false }));
-        }
-    };
-
-    const matricularAluno = async () => {
-        if (!user || !alunoSelecionado.matricula) {
-            showToast('warning', 'É necessário selecionar um aluno.');
-            return;
-        }
-
-        try {
-            const resposta = await axios.post('/eletivas/matricular-aluno', {
-                instituicao: user.instituicao,
-                codigo: codigoEletiva,
-                matricula: alunoSelecionado.matricula,
-                tipo: eletiva.tipo
-            });
-
-            if (resposta.status === 201) {
-                showToast('success', `O(a) aluno(a) <b>${alunoSelecionado.nome}</b> foi matriculado(a) com sucesso.`);
-                const novoAluno = alunoSelecionado;
-                setAlunosMatriculados(prev => [...prev, novoAluno]);
-                setTodosAlunosMatriculados(prev => [...prev, novoAluno]);
-                setTodosAlunos(prev => prev.filter(a => a.matricula !== alunoSelecionado.matricula));
-                setAlunoSelecionado({ matricula: '', nome: '' });
-            } else {
-                showToast('danger', 'Erro ao matricular aluno.');
-            }
-        } catch (error) {
-            showToast('danger', 'Erro ao matricular aluno.');
-        }
-    };
-
-    const desmatricularAluno = async () => {
-        if (!user || !alunoSelecionado.matricula) return;
-
-        try {
-            const resposta = await axios.post('/eletivas/desmatricular-aluno', {
-                instituicao: user.instituicao,
-                codigo: codigoEletiva,
-                matricula: alunoSelecionado.matricula,
-                tipo: eletiva.tipo
-            });
-
-            if (resposta.status === 200) {
-                showToast('success', `O(a) aluno(a) <b>${alunoSelecionado.nome}</b> foi removido(a) da eletiva.`);
-                setAlunosMatriculados(prev => prev.filter(a => a.matricula !== alunoSelecionado.matricula));
-                setTodosAlunosMatriculados(prev => prev.filter(a => a.matricula !== alunoSelecionado.matricula));
-                setAlunoSelecionado({ matricula: '', nome: '' });
-            }
-        } catch (error) {
-            showToast('danger', 'Erro ao desmatricular aluno.');
-        }
-    };
-
-    const filtrarAlunos = (e) => {
-        const termo = e.target.value.toLowerCase();
-        setBusca(prev => ({ ...prev, termo }));
-
-        if (termo === '') {
-            setAlunosMatriculados(todosAlunosMatriculados);
-        } else {
-            const filtrados = todosAlunosMatriculados.filter(aluno =>
-                aluno.matricula.toLowerCase().includes(termo) ||
-                aluno.nome.toLowerCase().includes(termo)
-            );
-            setAlunosMatriculados(filtrados);
         }
     };
 
@@ -164,6 +107,58 @@ export default function GerenciarEletiva() {
                 aluno.nome.toLowerCase().includes(termoMatricula)
             );
             setTodosAlunos(filtrados);
+        }
+    };
+
+    const matricularAluno = async () => {
+        if (!user || !alunoSelecionado.matricula) {
+            showToast('warning', 'É necessário selecionar um aluno.');
+            return;
+        }
+
+        try {
+            const resposta = await axios.post('/eletivas/matricular-aluno', { instituicao: user.instituicao, codigo: codigoEletiva, matricula: alunoSelecionado.matricula, tipo: eletiva.tipo });
+            if (resposta.status === 201) {
+                showToast('success', `O(a) aluno(a) <b>${alunoSelecionado.nome}</b> foi matriculado(a) com sucesso.`);
+                const novoAluno = alunoSelecionado;
+                setAlunosMatriculados(prev => [...prev, novoAluno]);
+                setTodosAlunos(prev => prev.filter(a => a.matricula !== alunoSelecionado.matricula));
+                setAlunoSelecionado({ matricula: '', nome: '' });
+            } else {
+                showToast('danger', 'Erro ao matricular aluno.');
+            }
+        } catch (error) {
+            showToast('danger', 'Erro ao matricular aluno.');
+        }
+    };
+
+    const desmatricularAluno = async () => {
+        if (!user || !alunoSelecionado.matricula) return;
+
+        try {
+            const resposta = await axios.post('/eletivas/desmatricular-aluno', { instituicao: user.instituicao, codigo: codigoEletiva, matricula: alunoSelecionado.matricula, tipo: eletiva.tipo });
+            if (resposta.status === 200) {
+                showToast('success', `O(a) aluno(a) <b>${alunoSelecionado.nome}</b> foi removido(a) da eletiva.`);
+                setAlunosMatriculados(prev => prev.filter(a => a.matricula !== alunoSelecionado.matricula));
+                setAlunoSelecionado({ matricula: '', nome: '' });
+            }
+        } catch (error) {
+            showToast('danger', 'Erro ao desmatricular aluno.');
+        }
+    };
+
+    const filtrarAlunos = (e) => {
+        const termo = e.target.value.toLowerCase();
+        setBusca(prev => ({ ...prev, termo }));
+
+        if (termo === '') {
+            listarAlunosMatriculados();
+        } else {
+            const filtrados = todosAlunosMatriculados.filter(aluno =>
+                aluno.matricula.toLowerCase().includes(termo) ||
+                aluno.nome.toLowerCase().includes(termo)
+            );
+            setAlunosMatriculados(filtrados);
         }
     };
 
@@ -194,6 +189,7 @@ export default function GerenciarEletiva() {
                             </div>
                         )}
                     </div>
+
                     {carregando.geral ? (
                         <div className="d-flex justify-content-center pt-4">
                             <div className="spinner-border text-primary" role="status">
@@ -204,15 +200,9 @@ export default function GerenciarEletiva() {
                         <>
                             <div className='d-flex' style={{ height: "calc(100% - 4em)" }}>
                                 <div className="box-alunos w-50 p-4">
-                                    <div className="d-flex justify-content-between align-items-center mb-4 gap-2">
+                                    <div className="d-flex justify-content-center align-items-center mb-4 gap-4">
                                         <div className='position-relative w-75'>
-                                            <input
-                                                type="text"
-                                                placeholder="Buscar aluno... (Matricula ou Nome)"
-                                                className="form-control"
-                                                value={busca.termo}
-                                                onChange={filtrarAlunos}
-                                            />
+                                            <input type="text" placeholder="Buscar aluno... (Matricula ou Nome)" className="form-control" value={busca.termo} onChange={filtrarAlunos} />
                                             <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3"></i>
                                         </div>
                                         <button className="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalMatricularAluno" onClick={listarTodosAlunos}>
@@ -226,23 +216,18 @@ export default function GerenciarEletiva() {
                                                     <tr>
                                                         <th>Matricula</th>
                                                         <th colSpan={2}>Nome</th>
-                                                        <th>Série</th>
+                                                        <th>Série / Turma</th>
                                                         <th></th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {alunosMatriculados.map(aluno => (
                                                         <tr key={aluno.matricula}>
-                                                            <td>{aluno.matricula}</td>
-                                                            <td colSpan={2}>{aluno.nome}</td>
-                                                            <td>{aluno.serie}</td>
+                                                            <td className='align-middle'>{aluno.matricula}</td>
+                                                            <td className='align-middle' colSpan={2}>{aluno.nome}</td>
+                                                            <td className='align-middle'>{aluno.serie} {aluno.turma}</td>
                                                             <td className="text-end">
-                                                                <button
-                                                                    className="btn btn-sm btn-outline-danger"
-                                                                    data-bs-toggle="modal"
-                                                                    data-bs-target="#desmatricularAluno"
-                                                                    onClick={() => setAlunoSelecionado(aluno)}
-                                                                >
+                                                                <button className="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#desmatricularAluno" onClick={() => setAlunoSelecionado(aluno)}>
                                                                     <i className="bi bi-person-dash-fill"></i>&ensp;Desmatricular
                                                                 </button>
                                                             </td>
@@ -252,26 +237,54 @@ export default function GerenciarEletiva() {
                                             </table>
                                         </div>
                                     ) : (
-                                        <p className="text-center">Nenhum aluno matriculado encontrado.</p>
+                                        <p className="text-center m-0 mt-2 text-danger fw-bold">Nenhum aluno matriculado encontrado.</p>
                                     )}
                                 </div>
                                 <div className="vr"></div>
                                 <div className="box-gerenciamento w-50 px-4">
-                                    <div className="eletiva-detalhes my-4">
-                                        <h5>Detalhes da Eletiva</h5>
-                                        <ul>
-                                            <li><b>Nome</b>: {eletiva.nome}</li>
-                                            <li><b>Descrição</b>: {eletiva.descricao}</li>
-                                            <li><b>Tipo</b>: {eletiva.tipo}</li>
-                                            <li><b>Professor</b>: {eletiva.professor}</li>
-                                            <li><b>Sala</b>: {eletiva.sala}</li>
-                                            <li><b>Dia</b>: {eletiva.dia} | {eletiva.horario}</li>
-                                            <li><b>Total de Alunos</b>: {alunosMatriculados.length}/{eletiva.total_alunos}</li>
-                                            {eletiva.serie && eletiva.turma && (
-                                                <li><b>Exclusiva para</b>: {eletiva.serie} {eletiva.turma}</li>
-                                            )}
-                                        </ul>
+                                    <div className="p-4 my-4 shadow-sm border-left-primary bg-light-subtle">
+                                        <div className="card-body">
+                                            <h5 className="fw-bold text-primary">Detalhes da Eletiva</h5>
+                                            <div className="row">
+                                                <div className="col-md-6 mb-3">
+                                                    <h6 className="text-secondary">Informações Gerais</h6>
+                                                    <ul className="list-unstyled">
+                                                        <li><b>Nome:</b> {eletiva.nome}</li>
+                                                        <li><b>Descrição:</b> {eletiva.descricao}</li>
+                                                        <li><b>Tipo:</b> {eletiva.tipo}</li>
+                                                    </ul>
+                                                </div>
+                                                <div className="col-md-6 mb-3">
+                                                    <h6 className="text-secondary">Professor e Sala</h6>
+                                                    <ul className="list-unstyled">
+                                                        <li><b>Professor:</b> {eletiva.professor}</li>
+                                                        <li><b>Sala:</b> {eletiva.sala}</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+
+                                            <div className="row">
+                                                <div className="col-md-6 mb-3">
+                                                    <h6 className="text-secondary">Horário e Dia</h6>
+                                                    <ul className="list-unstyled">
+                                                        <li><b>Dia:</b> {eletiva.dia}</li>
+                                                        <li><b>Horário:</b> {eletiva.horario}</li>
+                                                    </ul>
+                                                </div>
+                                                <div className="col-md-6 mb-3">
+                                                    <h6 className="text-secondary">Alunos</h6>
+                                                    <ul className="list-unstyled">
+                                                        <li><b>Total de Alunos:</b> {alunosMatriculados.length}/{eletiva.total_alunos}</li>
+                                                        {eletiva.exclusiva && eletiva.serie && eletiva.turma && (
+                                                            <li><b>Exclusiva para:</b> {eletiva.serie} {eletiva.turma}</li>
+                                                        )}
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
+
+
                                 </div>
                             </div>
                         </>
@@ -304,58 +317,45 @@ export default function GerenciarEletiva() {
                             ) : (
                                 <>
                                     <div className='position-relative'>
-                                        <input
-                                            type="text"
-                                            className="form-control mb-3"
-                                            placeholder="Buscar aluno... (Matricula ou Nome)"
-                                            value={busca.termoMatricula}
-                                            onChange={filtrarAlunosMatricula}
-                                        />
+                                        <input type="text" className="form-control" placeholder="Buscar aluno... (Matricula ou Nome)" value={busca.termoMatricula} onChange={filtrarAlunosMatricula} />
                                         <i className="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3"></i>
                                     </div>
+                                    {eletiva.exclusiva && (
+                                        <div className="form-check form-switch">
+                                            <input className="form-check-input" type="checkbox" role="switch" id="toggleExibirOutrasTurmas" checked={mostrarOutrasTurmas} onChange={(e) => setMostrarOutrasTurmas(e.target.checked)} />
+                                            <label className="form-check-label" htmlFor="toggleExibirOutrasTurmas">Mostrar alunos de outras turmas.</label>
+                                        </div>
+                                    )}
                                     {todosAlunos.length > 0 ? (
-                                        <table className="table table-hover">
+                                        <table className="table table-hover mt-4">
                                             <thead>
                                                 <tr>
                                                     <th></th>
                                                     <th>Matrícula</th>
                                                     <th>Nome</th>
-                                                    <th>Série</th>
+                                                    <th>Série / Turma</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {todosAlunos.map(aluno => (
                                                     <tr key={aluno.matricula}>
-                                                        <td>
-                                                            <input
-                                                                type="radio"
-                                                                name="aluno"
-                                                                id={aluno.matricula}
-                                                                value={aluno.matricula}
-                                                                onChange={() => setAlunoSelecionado(aluno)}
-                                                            />
-                                                        </td>
-                                                        <td>{aluno.matricula}</td>
-                                                        <td>{aluno.nome}</td>
-                                                        <td>{aluno.serie}</td>
+                                                        <td className='align-middle'><input type="radio" name="aluno" id={aluno.matricula} value={aluno.matricula} onChange={() => setAlunoSelecionado(aluno)} /></td>
+                                                        <td className='align-middle'>{aluno.matricula}</td>
+                                                        <td className='align-middle'>{aluno.nome}</td>
+                                                        <td className='align-middle'>{aluno.serie} {aluno.turma}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
                                         </table>
                                     ) : (
-                                        <p className="text-center">Nenhum aluno disponível para matrícula.</p>
+                                        <p className="text-center m-0 mt-2 text-danger fw-bold">Nenhum aluno disponível para matrícula.</p>
                                     )}
                                 </>
                             )}
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button
-                                type="button"
-                                className="btn btn-success"
-                                data-bs-dismiss="modal"
-                                onClick={matricularAluno}
-                            >
+                            <button type="button" className="btn btn-success" data-bs-dismiss="modal" onClick={matricularAluno} >
                                 <i className="bi bi-person-plus"></i>&ensp;Matricular
                             </button>
                         </div>
@@ -383,12 +383,7 @@ export default function GerenciarEletiva() {
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button
-                                type="button"
-                                className="btn btn-danger"
-                                data-bs-dismiss="modal"
-                                onClick={desmatricularAluno}
-                            >
+                            <button type="button" className="btn btn-danger" data-bs-dismiss="modal" onClick={desmatricularAluno} >
                                 <i className="bi bi-person-dash-fill"></i>&ensp;Desmatricular
                             </button>
                         </div>
@@ -411,9 +406,7 @@ export default function GerenciarEletiva() {
                             </div>
                             <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div className="modal-body">
-                            <EditarEletiva codigo={codigoEletiva} />
-                        </div>
+                        <EditarEletiva codigo={codigoEletiva} />
                     </div>
                 </div>
             </div>

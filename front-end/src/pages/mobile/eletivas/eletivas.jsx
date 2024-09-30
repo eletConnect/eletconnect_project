@@ -179,13 +179,13 @@ export default function MHome() {
                         <div id='toast-container' className="toast-container position-absolute bottom-0 start-50 translate-middle-x mb-2"></div>
 
                         {!inscricoesEncerradas && (
-                            <div className="text-center py-3">
+                            <div className="text-center py-2">
                                 <p id='period' className='m-0'>Período de inscrições acaba em</p>
-                                <p id="timerPeriod" className="m-0 fw-bold">{tempoRestante}</p>
+                                <p id="timerPeriod" className="m-0"><small className='fw-bold'>{tempoRestante}</small></p>
                             </div>
                         )}
 
-                        <ul className={`nav nav-tabs justify-content-center w-100 ${!inscricoesEncerradas ? '' : 'mt-3'}`}>
+                        <ul className={`nav nav-tabs justify-content-center w-100 ${!inscricoesEncerradas ? '' : 'mt-2'}`}>
                             {tabs.map(tab => (
                                 <li className="nav-item" key={tab.nome}>
                                     <button 

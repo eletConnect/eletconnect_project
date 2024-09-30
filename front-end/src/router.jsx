@@ -21,7 +21,6 @@ import EditarSenhaPage from "./pages/web/auth/changePassword";
 import CadastrarInstituicaoPage from "./pages/web/configuracoes/instituicao/cadastrarInstituicao";
 import EditarInstituicaoPage from "./pages/web/configuracoes/instituicao/editarInstituicao";
 import ColaboradoresPage from "./pages/web/configuracoes/colaboradores/colaboradores";
-import PermissoesPage from "./pages/web/configuracoes/permissoes/permissoes";
 
 import LoginPage from "./pages/web/auth/Login";
 import RegisterPage from "./pages/web/auth/Register";
@@ -71,7 +70,6 @@ const rotas = createBrowserRouter([
     rotaProtegida('/settings/institution', <CadastrarInstituicaoPage />, ['Diretor', 'Coordenador']),
     rotaProtegida('/settings/institution/edit', <EditarInstituicaoPage />, SOMENTE_DIRETOR),
     rotaProtegida('/settings/collaborators', <ColaboradoresPage />, SOMENTE_DIRETOR),
-    rotaProtegida('/settings/permissions', <PermissoesPage />, SOMENTE_DIRETOR),
 
     // Páginas de Autenticação
     { path: '/login', element: <LoginPage /> },
