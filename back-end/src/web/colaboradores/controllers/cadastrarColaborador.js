@@ -28,6 +28,21 @@ exports.cadastrarColaborador = async (request, response) => {
             return response.status(401).json({ mensagem: 'Erro ao verificar o e-mail fornecido.' });
         }
 
+        // Verifica se já existe um colaborador com a mesma matrícula
+        const { data: verificarMatricula, error: verificarMatriculaError } = await supabase
+            .from('usuarios')
+            .select('matricula')
+            .eq('matricula', matricula)
+            .eq('instituicao', instituicao);
+
+        if (verificarMatricula && verificarMatricula.length > 0) {
+            return response.status(401).json({ mensagem: 'Esta matrícula já está registrada.' });
+        }
+
+        if (verificarMatriculaError) {
+            return response.status(401).json({ mensagem: 'Erro ao verificar a matrícula fornecida.' });
+        }
+
         // Gera uma senha aleatória para o colaborador
         const senhaGerada = gerarSenhaAleatoria();
 
