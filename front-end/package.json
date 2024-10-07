@@ -1,5 +1,5 @@
 {
-  "name": "eletconnect",
+  "name": "front-end",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,14 +10,21 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@supabase/supabase-js": "^2.45.2",
     "axios": "^1.7.5",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
+    "chart.js": "^4.4.4",
+    "luxon": "^3.5.0",
+    "primereact": "^10.8.2",
     "react": "^18.3.1",
+    "react-chartjs-2": "^5.2.0",
     "react-device-detect": "^2.2.3",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.1"
+    "react-router-dom": "^6.26.1",
+    "react-to-print": "^3.0.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/react": "^18.3.1",
