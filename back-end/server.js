@@ -49,7 +49,7 @@ app.use(helmet());
 // Limitação de requisições por IP para prevenir abusos
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 1000,
+  max: 10000,
 });
 app.use(limiter);
 
