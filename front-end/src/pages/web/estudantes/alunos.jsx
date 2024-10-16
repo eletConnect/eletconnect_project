@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { Tooltip } from 'bootstrap';
 import axios from '../../../configs/axios';
 import Header from '../../../components/header';
 import showToast from '../../../utills/toasts';
 import EditarAluno from './editarAluno';
 import * as XLSX from 'xlsx';
-import { Tooltip } from 'bootstrap';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
 
 export default function Alunos() {
     const [ordenacao, setOrdenacao] = useState({ coluna: '', ascendente: true });
@@ -98,6 +100,71 @@ export default function Alunos() {
         } finally {
             setEnviando(false);
         }
+    };
+
+    const gerarPDF = () => {
+        const doc = new jsPDF();
+
+        // Definindo título e estilo
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.text('Relatório de Erros de Validação', 105, 15, null, null, 'center');
+
+        // Adicionando subtítulo com a data atual
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        const dataAtual = new Date().toLocaleDateString('pt-BR');
+        doc.text(`Data: ${dataAtual}`, 200, 15, null, null, 'right');
+
+        // Verifica se há erros
+        if (erros && Object.keys(erros).length > 0) {
+            let yPosition = 30; // Posição inicial no eixo Y
+            const tableRows = [];
+            const tableHeaders = ['Matrícula', 'Nome', 'Erros de Validação'];
+
+            Object.entries(erros).forEach(([index, erro]) => {
+                const aluno = dados[index] || {};
+                const alunoInfo = aluno.matricula ? `Matrícula: ${aluno.matricula} - Nome: ${aluno.nome}` : 'Dados do aluno não encontrados';
+                const errosTexto = Object.values(erro).join(', ');
+
+                // Adiciona cada linha ao array de linhas da tabela
+                tableRows.push([aluno.matricula || 'N/A', aluno.nome || 'N/A', errosTexto]);
+            });
+
+            // Adiciona tabela ao PDF usando autoTable
+            doc.autoTable({
+                head: [tableHeaders],
+                body: tableRows,
+                startY: yPosition,
+                margin: { top: 30 },
+                styles: { fontSize: 10, cellPadding: 5, overflow: 'linebreak' },
+                headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [241, 241, 241] },
+                columnStyles: {
+                    0: { cellWidth: 30 },
+                    1: { cellWidth: 50 },
+                    2: { cellWidth: 100 },
+                },
+            });
+
+            yPosition = doc.lastAutoTable.finalY + 10;
+            doc.setFontSize(12);
+            doc.text(`Total de alunos com erros: ${Object.keys(erros).length}`, 14, yPosition);
+        } else {
+            doc.setFontSize(12);
+            doc.text('Nenhum erro encontrado nos dados fornecidos.', 105, 30, null, null, 'center');
+        }
+
+        // Adiciona rodapé
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(10);
+            doc.text(`Página ${i} de ${pageCount}`, 105, 290, null, null, 'center');
+        }
+
+        // Salva o PDF
+        doc.save('Relatorio_Erros_Validacao.pdf');
     };
 
     const cadastrarAluno = async (e) => {
@@ -337,23 +404,45 @@ export default function Alunos() {
                                             </tbody>
                                         </table>
                                     </div>
-                                    <nav aria-label="Page navigation example" className='d-flex align-items-center justify-content-between'>
-                                        <div className="text-center">
-                                            Mostrando {obterIntervaloAtual()} de {alunosFiltradosEOrdenados.length} resultados
-                                        </div>
+                                    <nav aria-label="Page navigation example" className="d-flex align-items-center justify-content-between">
+                                        <div className="text-center">Mostrando {obterIntervaloAtual()} de {alunosFiltradosEOrdenados.length} resultados</div>
                                         <ul className="pagination justify-content-end">
                                             <li className={`page-item ${paginaAtual === 1 ? 'disabled' : ''}`}>
-                                                <button className="page-link" onClick={paginacaoAnterior}>Anterior</button>
+                                                <button className="page-link" onClick={paginacaoAnterior}>&laquo; Anterior</button>
                                             </li>
-                                            {paginasVisiveis().map((numeroPagina) => (
-                                                <li key={numeroPagina} className={`page-item ${paginaAtual === numeroPagina ? 'active' : ''}`}>
-                                                    <button className="page-link" onClick={() => setPaginaAtual(numeroPagina)}>
-                                                        {numeroPagina}
+                                            <li className={`page-item ${paginaAtual === 1 ? 'active' : ''}`}>
+                                                <button className="page-link" onClick={() => setPaginaAtual(1)}>1</button>
+                                            </li>
+                                            {paginaAtual > 3 && (
+                                                <li className="page-item disabled">
+                                                    <span className="page-link">...</span>
+                                                </li>
+                                            )}
+                                            {paginasVisiveis().map((numeroPagina) =>
+                                                numeroPagina !== 1 && numeroPagina !== totalPaginas ? (
+                                                    <li key={numeroPagina} className={`page-item ${paginaAtual === numeroPagina ? 'active' : ''}`}>
+                                                        <button className="page-link" onClick={() => setPaginaAtual(numeroPagina)}>
+                                                            {numeroPagina}
+                                                        </button>
+                                                    </li>
+                                                ) : null
+                                            )}
+                                            {paginaAtual < totalPaginas - 2 && (
+                                                <li className="page-item disabled">
+                                                    <span className="page-link">...</span>
+                                                </li>
+                                            )}
+                                            {totalPaginas > 1 && (
+                                                <li className={`page-item ${paginaAtual === totalPaginas ? 'active' : ''}`}>
+                                                    <button className="page-link" onClick={() => setPaginaAtual(totalPaginas)}>
+                                                        {totalPaginas}
                                                     </button>
                                                 </li>
-                                            ))}
+                                            )}
                                             <li className={`page-item ${paginaAtual === totalPaginas ? 'disabled' : ''}`}>
-                                                <button className="page-link" onClick={paginacaoProxima}>Próximo</button>
+                                                <button className="page-link" onClick={paginacaoProxima}>
+                                                    Próximo &raquo;
+                                                </button>
                                             </li>
                                         </ul>
                                     </nav>
@@ -404,9 +493,12 @@ export default function Alunos() {
                                         <label htmlFor="turma" className="form-label">Turma <span className="text-danger">*</span></label>
                                         <select className="form-select" id="turma" name="turma" required >
                                             <option value="">Selecione...</option>
-                                            {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].map(turma => (
-                                                <option key={turma} value={turma}>{turma}</option>
-                                            ))}
+                                            {[...Array(26)].map((_, i) => {
+                                                const turma = String.fromCharCode(65 + i); // 65 é o código ASCII para 'A'
+                                                return (
+                                                    <option key={turma} value={turma}>{turma}</option>
+                                                );
+                                            })}
                                         </select>
                                     </div>
                                 </div>
@@ -534,16 +626,23 @@ export default function Alunos() {
                                 <p>Todos os dados foram validados corretamente. Deseja prosseguir com o cadastro?</p>
                             )}
                         </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Cancelar</button>
-                            <button className="btn btn-primary" data-bs-dismiss="modal" onClick={cadastrarPlanilha}>
-                                <i className="bi bi-person-add"></i>&ensp;Cadastrar
-                            </button>
+                        <div className={`modal-footer ${erros && Object.keys(erros).length > 0 ? 'd-flex justify-content-between' : ''} `}>
+                            {erros && Object.keys(erros).length ? (
+                                <button type="button" className="btn btn-danger" onClick={gerarPDF}>
+                                    <i className="bi bi-file-arrow-down"></i>&ensp;Baixar PDF
+                                </button>
+                            ) : null}
+
+                            <span className='d-flex gap-2'>
+                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Cancelar</button>
+                                <button className="btn btn-primary" data-bs-dismiss="modal" onClick={cadastrarPlanilha}>
+                                    <i className="bi bi-person-add"></i>&ensp;Cadastrar
+                                </button>
+                            </span>
                         </div>
                     </div>
                 </div>
             </div>
-
 
             {/* Modal: Redefinir Senha */}
             <div className="modal fade" id="redefinirSenha" tabIndex="-1">

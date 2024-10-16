@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { DateRange } from 'react-date-range';
+import 'react-date-range/dist/styles.css'; // Estilos básicos
+import 'react-date-range/dist/theme/default.css'; // Tema padrão
 import axios from '../../../configs/axios';
 import Header from '../../../components/header';
 import showToast from '../../../utills/toasts';
@@ -16,6 +19,14 @@ export default function Eletiva() {
     const [isExclusiva, setIsExclusiva] = useState(false);
     const [dataInicio, setDataInicio] = useState('');
     const [dataFim, setDataFim] = useState('');
+
+    const [periodoSelecionado, setPeriodoSelecionado] = useState([
+        {
+            startDate: new Date(),
+            endDate: new Date(),
+            key: 'selection',
+        },
+    ]);
 
     const itensPorPagina = 10;
     const usuario = JSON.parse(sessionStorage.getItem('user'));
@@ -98,18 +109,23 @@ export default function Eletiva() {
     const salvarPeriodo = async (e) => {
         e.preventDefault();
         try {
-            const dataInicioEscolhida = new Date(`${dataInicio}:00`);
-            const dataFimEscolhida = new Date(`${dataFim}:00`);
+            const dataInicioEscolhida = periodoSelecionado[0].startDate;
+            const dataFimEscolhida = periodoSelecionado[0].endDate;
 
-            if (isNaN(dataInicioEscolhida) || isNaN(dataFimEscolhida)) {
-                showToast('danger', 'Por favor, insira datas válidas.');
-                return;
-            }
+            // Definir o início do dia (00:00) para data de início
+            const dataInicioBrasilia = new Date(dataInicioEscolhida);
+            dataInicioBrasilia.setUTCHours(0, 0, 0, 0); // Hora de início do dia
 
-            const dataInicioBrasilia = new Date(dataInicioEscolhida.getTime() - 3 * 60 * 60000);
-            const dataFimBrasilia = new Date(dataFimEscolhida.getTime() - 3 * 60 * 60000);
+            // Definir o fim do dia (23:59) para data de fim
+            const dataFimBrasilia = new Date(dataFimEscolhida);
+            dataFimBrasilia.setUTCHours(23, 59, 59, 999); // Último minuto do dia
 
-            const response = await axios.post('/eletivas/definir-periodo', { instituicao: usuario.instituicao, dataInicio: dataInicioBrasilia.toISOString(), dataFim: dataFimBrasilia.toISOString() });
+            const response = await axios.post('/eletivas/definir-periodo', {
+                instituicao: usuario.instituicao,
+                dataInicio: dataInicioBrasilia.toISOString(), // Hora de início do dia
+                dataFim: dataFimBrasilia.toISOString(),       // Última hora do dia
+            });
+
             if (response.status === 200) {
                 showToast('success', response.data.mensagem);
             }
@@ -117,6 +133,7 @@ export default function Eletiva() {
             showToast('danger', error.response?.data.mensagem || 'Erro ao definir o período de inscrições.');
         }
     };
+
 
     const alternarOrdenacao = (coluna) => {
         setOrdenacao((prevState) => ({
@@ -202,7 +219,7 @@ export default function Eletiva() {
                             </span>
                             {!isLoading && (
                                 <div className='d-flex gap-2'>
-                                    <button className='btn btn-outline-secondary' data-bs-toggle="modal" data-bs-target="#defirnirPeriodo">
+                                    <button className='btn btn-outline-secondary' data-bs-toggle="modal" data-bs-target="#definirPeriodo">
                                         <i className="bi bi-calendar-check"></i>&ensp;Definir período
                                     </button>
                                     <button className='btn btn-outline-secondary' data-bs-toggle="modal" data-bs-target="#cadastrarEletiva">
@@ -297,23 +314,52 @@ export default function Eletiva() {
                                         </table>
                                     </div>
                                     <nav aria-label="Page navigation example" className="d-flex align-items-center justify-content-between">
-                                        <div className="text-center">
-                                            Mostrando {obterIntervaloAtual()} de {eletivasFiltradasEOrdenadas.length} resultados
-                                        </div>
-                                        <ul className="pagination justify-content-center">
+                                        <div className="text-center">Mostrando {obterIntervaloAtual()} de {eletivasFiltradasEOrdenadas.length} resultados</div>
+                                        <ul className="pagination justify-content-end">
                                             <li className={`page-item ${paginaAtual === 1 ? 'disabled' : ''}`}>
-                                                <button className="page-link" onClick={paginacaoAnterior}>Anterior</button>
+                                                <button className="page-link" onClick={paginacaoAnterior}>
+                                                    &laquo; Anterior
+                                                </button>
                                             </li>
-                                            {paginasVisiveis().map((numeroPagina) => (
-                                                <li key={numeroPagina} className={`page-item ${paginaAtual === numeroPagina ? 'active' : ''}`}>
-                                                    <button className="page-link" onClick={() => setPaginaAtual(numeroPagina)}>{numeroPagina}</button>
+                                            {totalPaginas > 0 && (
+                                                <li className={`page-item ${paginaAtual === 1 ? 'active' : ''}`}>
+                                                    <button className="page-link" onClick={() => setPaginaAtual(1)}>1</button>
                                                 </li>
-                                            ))}
+                                            )}
+                                            {paginaAtual > 3 && (
+                                                <li className="page-item disabled">
+                                                    <span className="page-link">...</span>
+                                                </li>
+                                            )}
+                                            {paginasVisiveis().map((numeroPagina) =>
+                                                numeroPagina !== 1 && numeroPagina !== totalPaginas ? (
+                                                    <li key={numeroPagina} className={`page-item ${paginaAtual === numeroPagina ? 'active' : ''}`}>
+                                                        <button className="page-link" onClick={() => setPaginaAtual(numeroPagina)}>
+                                                            {numeroPagina}
+                                                        </button>
+                                                    </li>
+                                                ) : null
+                                            )}
+                                            {paginaAtual < totalPaginas - 2 && (
+                                                <li className="page-item disabled">
+                                                    <span className="page-link">...</span>
+                                                </li>
+                                            )}
+                                            {totalPaginas > 1 && (
+                                                <li className={`page-item ${paginaAtual === totalPaginas ? 'active' : ''}`}>
+                                                    <button className="page-link" onClick={() => setPaginaAtual(totalPaginas)}>
+                                                        {totalPaginas}
+                                                    </button>
+                                                </li>
+                                            )}
                                             <li className={`page-item ${paginaAtual === totalPaginas ? 'disabled' : ''}`}>
-                                                <button className="page-link" onClick={paginacaoProxima}>Próximo</button>
+                                                <button className="page-link" onClick={paginacaoProxima}>
+                                                    Próximo &raquo;
+                                                </button>
                                             </li>
                                         </ul>
                                     </nav>
+
                                 </>
                             )}
                         </div>
@@ -417,9 +463,12 @@ export default function Eletiva() {
                                                     <label htmlFor="turma" className="form-label">Turma <span className="text-danger">*</span></label>
                                                     <select className="form-select" id="turma" name="turma" required>
                                                         <option value="">Selecione...</option>
-                                                        {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].map(turma => (
-                                                            <option key={turma} value={turma}>{turma}</option>
-                                                        ))}
+                                                        {[...Array(26)].map((_, i) => {
+                                                            const turma = String.fromCharCode(65 + i); // 65 é o código ASCII para 'A'
+                                                            return (
+                                                                <option key={turma} value={turma}>{turma}</option>
+                                                            );
+                                                        })}
                                                     </select>
                                                     <div className="invalid-feedback">Por favor, selecione a turma.</div>
                                                 </div>
@@ -485,41 +534,6 @@ export default function Eletiva() {
                 </div>
             </div>
 
-            {/* Modal: Definir Período */}
-            <div className="modal fade" id="defirnirPeriodo" tabIndex="-1" aria-labelledby="definirPeriodoLabel" aria-hidden="true">
-                <div className="modal-dialog">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <div className="d-flex align-items-center gap-2">
-                                <span className='d-flex align-items-center gap-2'>
-                                    <i className="bi bi-journal-bookmark-fill fs-3"></i>
-                                    <h4 className='m-0 fs-4'>Eletivas</h4>
-                                </span>
-                                <i className="bi bi-arrow-right-short fs-4"></i>
-                                <h5 className="m-0">Definir período</h5>
-                            </div>
-                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <form onSubmit={salvarPeriodo}>
-                            <div className="m-3">
-                                <div className="mb-3">
-                                    <label htmlFor="dataInicio" className="form-label">Início do período de inscrições <span className='text-danger'>*</span></label>
-                                    <input type="datetime-local" className="form-control" id="dataInicio" value={dataInicio} onChange={e => setDataInicio(e.target.value)} />
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="dataFim" className="form-label">Fim do período de inscrições <span className='text-danger'>*</span></label>
-                                    <input type="datetime-local" className="form-control" id="dataFim" value={dataFim} onChange={e => setDataFim(e.target.value)} required />
-                                </div>
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" className="btn btn-primary" data-bs-dismiss="modal"><i className="bi bi-calendar-check"></i>&ensp;Definir</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
             {/* Modal: Excluir Eletivas Selecionadas */}
             <div className="modal fade" id="excluirSelecionadasModal" tabIndex="-1" aria-labelledby="excluirSelecionadasModalLabel" aria-hidden="true">
                 <div className="modal-dialog">
@@ -536,6 +550,52 @@ export default function Eletiva() {
                             <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                             <button type="button" className="btn btn-danger" onClick={excluirSelecionadas} data-bs-dismiss="modal">Excluir</button>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Modal: Definir Período */}
+            <div className="modal fade" id="definirPeriodo" tabIndex="-1" aria-labelledby="definirPeriodoLabel" aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <div className="d-flex align-items-center gap-2">
+                                <span className='d-flex align-items-center gap-2'>
+                                    <i className="bi bi-journal-bookmark-fill fs-3"></i>
+                                    <h4 className='m-0 fs-4'>Eletivas</h4>
+                                </span>
+                                <i className="bi bi-arrow-right-short fs-4"></i>
+                                <h5 className="m-0">Definir período</h5>
+                            </div>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form onSubmit={salvarPeriodo}>
+                            <div className="text-center m-2">
+                                <p className='mx-4'>
+                                    O período de inscrições vai de <strong>{periodoSelecionado[0].startDate.toLocaleDateString('pt-BR', {
+                                        weekday: 'long',
+                                        month: 'long',
+                                        day: 'numeric',
+                                    })}</strong> até <strong>{periodoSelecionado[0].endDate.toLocaleDateString('pt-BR', {
+                                        weekday: 'long',
+                                        month: 'long',
+                                        day: 'numeric',
+                                    })}</strong>, totalizando <strong>
+                                        {
+                                            Math.ceil(
+                                                (periodoSelecionado[0].endDate.getTime() - periodoSelecionado[0].startDate.getTime()) / (1000 * 3600 * 24)
+                                            )
+                                        }</strong> dias.
+                                </p>
+                                <DateRange editableDateInputs={true} onChange={(item) => setPeriodoSelecionado([item.selection])} moveRangeOnFirstSelection={false} ranges={periodoSelecionado} />
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" className="btn btn-primary" data-bs-dismiss="modal">
+                                    <i className="bi bi-calendar-check"></i>&ensp;Definir
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

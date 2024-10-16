@@ -4,8 +4,8 @@ import showToast from '../../../utills/toasts';
 
 export default function EditarEletiva({ codigo }) {
     const [eletiva, setEletiva] = useState({});
-    const [loading, setLoading] = useState(true); 
-    const [isExclusiva, setIsExclusiva] = useState(false); 
+    const [loading, setLoading] = useState(true);
+    const [isExclusiva, setIsExclusiva] = useState(false);
 
     const user = JSON.parse(sessionStorage.getItem('user'));
 
@@ -27,7 +27,7 @@ export default function EditarEletiva({ codigo }) {
         } catch (error) {
             showToast('danger', error.response?.data?.mensagem || 'Erro ao buscar a eletiva');
         } finally {
-            setLoading(false); 
+            setLoading(false);
         }
     };
 
@@ -41,13 +41,13 @@ export default function EditarEletiva({ codigo }) {
                 instituicao: user.instituicao,
                 ...eletiva,
                 total_alunos: parseInt(eletiva.total_alunos, 10),
-                serie: isExclusiva ? eletiva.serie : null, 
-                turma: isExclusiva ? eletiva.turma : null, 
+                serie: isExclusiva ? eletiva.serie : null,
+                turma: isExclusiva ? eletiva.turma : null,
                 exclusiva: isExclusiva
             });
             if (response.status === 200) {
                 showToast('success', response.data.mensagem);
-                buscarEletiva(); 
+                buscarEletiva();
             }
         } catch (error) {
             showToast('danger', error.response?.data?.mensagem || 'Erro ao editar a eletiva');
@@ -151,9 +151,12 @@ export default function EditarEletiva({ codigo }) {
                                         <label htmlFor="turma" className="form-label">Turma <span className="text-danger">*</span></label>
                                         <select className="form-select" id="turma" value={eletiva.turma || ""} onChange={handleChange} required>
                                             <option value="">Selecione...</option>
-                                            {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].map(turma => (
-                                                <option key={turma} value={turma}>{turma}</option>
-                                            ))}
+                                            {[...Array(26)].map((_, i) => {
+                                                const turma = String.fromCharCode(65 + i); // 65 é o código ASCII para 'A'
+                                                return (
+                                                    <option key={turma} value={turma}>{turma}</option>
+                                                );
+                                            })}
                                         </select>
                                     </div>
                                 </div>

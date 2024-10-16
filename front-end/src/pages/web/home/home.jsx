@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Chart } from 'primereact/chart';
 import axios from '../../../configs/axios';
-import CentralAvisos from './centralAvisos';
 import '../../../assets/styles/my-bootstrap.css';
 
 function InfoCard({ title, value, icon, color, link }) {
@@ -54,13 +53,13 @@ export default function Home() {
                         datasets: [
                             {
                                 type: 'bar',
-                                label: 'Matriculados em Eletivas',
+                                label: 'Matriculados em eletivas',
                                 backgroundColor: 'rgba(66, 165, 245, 0.7)',
                                 data: [quantidadeMatriculados1Ano, quantidadeMatriculados2Ano, quantidadeMatriculados3Ano]
                             },
                             {
                                 type: 'bar',
-                                label: 'Não Matriculados',
+                                label: 'Não Matriculados em eletivas',
                                 backgroundColor: 'rgba(255, 99, 132, 0.7)',
                                 data: [quantidadeAlunos1Ano - quantidadeMatriculados1Ano, quantidadeAlunos2Ano - quantidadeMatriculados2Ano, quantidadeAlunos3Ano - quantidadeMatriculados3Ano]
                             }
@@ -71,7 +70,7 @@ export default function Home() {
                         labels: ['Eletivas', 'Projetos de Vida', 'Trilhas'],
                         datasets: [{
                             type: 'bar',
-                            label: 'Quantidade Total',
+                            label: '‎',
                             backgroundColor: ['rgba(13, 110, 253, 0.7)', 'rgba(25, 135, 84, 0.7)', 'rgba(220, 53, 69, 0.7)'],
                             data: [quantidadeEletivas, quantidadeProjetosVida, quantidadeTrilhas]
                         }]
@@ -89,7 +88,7 @@ export default function Home() {
                         plugins: { legend: { labels: { color: textColor } } },
                         scales: {
                             x: { stacked: true, ticks: { color: textColorSecondary }, grid: { color: surfaceBorder } },
-                            y: { stacked: false, ticks: { color: textColorSecondary }, grid: { color: surfaceBorder }, max: maxAlunos + 2 }
+                            y: { stacked: false, ticks: { color: textColorSecondary }, grid: { color: surfaceBorder }, max: maxAlunos + 1 }
                         }
                     });
 
@@ -98,7 +97,7 @@ export default function Home() {
                         plugins: { legend: { labels: { color: textColor } } },
                         scales: {
                             x: { stacked: false, ticks: { color: textColorSecondary }, grid: { color: surfaceBorder } },
-                            y: { stacked: false, ticks: { color: textColorSecondary }, grid: { color: surfaceBorder }, max: maxEletivas + 2 }
+                            y: { stacked: false, ticks: { color: textColorSecondary }, grid: { color: surfaceBorder }, max: maxEletivas + 1 }
                         }
                     });
 
@@ -137,9 +136,9 @@ export default function Home() {
                                 <img className='image-school' width={50} src={escola?.logotipo || ""} alt="" />
                                 <h3 className="m-0 fs-4">{escola?.nome || "Instituição"}</h3>
                             </span>
-                            <button className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#centralAviso">
+                            <a className="btn btn-outline-secondary" href="/warnings">
                                 <i className="bi bi-megaphone"></i>&ensp;Central de avisos
-                            </button>
+                            </a>
                         </div>
 
                         <div className="p-4">
@@ -181,20 +180,6 @@ export default function Home() {
                     </div>
                 </section>
             </main>
-
-            <div className="modal fade" id="centralAviso" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div className="modal-dialog modal-xl">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h1 className="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div className="modal-body">
-                            <CentralAvisos />
-                        </div>
-                    </div>
-                </div>
-            </div>
         </>
     );
 }

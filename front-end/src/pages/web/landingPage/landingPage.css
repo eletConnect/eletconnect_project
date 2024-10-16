@@ -42,6 +42,7 @@ main {
 
 #painel {
     background-color: #134574;
+    height: 40em;
 }
 
 #painel-text {
@@ -49,7 +50,7 @@ main {
     font-size: 1.5em;
     margin: 0 10em;
     padding: 4em 0;
-    height: 25.5em;
+    height: 26.6em;
 }
 
 #painel .efeito-flutuante-infinito {
@@ -73,22 +74,26 @@ main {
     }
 }
 
-#clientes, #contato {
+#clientes,
+#contato {
     padding: 3em 6em;
 }
 
-#solucoes .painel {
-    height: 13.7em;
+#scroll-etapa::-webkit-scrollbar {
+    width: 4px;
+    height: 6px;
+    /* A altura só é vista quando a rolagem é horizontal */
 }
 
-#solucoes .painel h2 {
-    text-align: center;
+#scroll-etapa::-webkit-scrollbar-track {
+    background: transparent;
+    padding: 2px;
 }
 
-#solucoes .painel p {
-    text-align: justify;
-    margin: 0 1em;
+#scroll-etapa::-webkit-scrollbar-thumb {
+    background-color: blue;
 }
+
 
 @media (max-width: 768px) {
 

@@ -39,12 +39,13 @@ export default function MHeader() {
                         <img width={50} src='https://www.gov.br/cdn/sso-status-bar/src/image/user.png' alt='Foto de perfil' className='rounded-circle' data-bs-toggle="dropdown" />
                         <ul className="dropdown-menu">
                             <li className='dropdown-item text-white p-3' style={{ backgroundColor: '#1d3c76' }}>
-                                <p className='m-0'><b>Nome</b>: {aluno.nome} </p>
                                 <p className='m-0'><b>Matricula</b>: {aluno.matricula}</p>
-                                <p className='m-0'><b>Serie:</b> {aluno.serie}</p>
+                                <p className='m-0'><b>Nome</b>: {aluno.nome} </p>
+                                <p className='m-0'><b>Serie/Turma:</b> {aluno.serie} {aluno.turma}</p>
                             </li>
-                            <li><a href="/m/settings" className='dropdown-item'><i className="bi bi-gear-fill"></i> Configurações</a></li>
-                            <li><a className="dropdown-item" onClick={logout}><i className="bi bi-door-open-fill"></i> Deslogar</a></li>
+                            <li><hr className="dropdown-divider" /></li>
+                            <li><a href="/m/change-password" className='dropdown-item'><i className="bi bi-shield-lock-fill"></i>&ensp;Alterar senha</a></li>
+                            <li><a className="dropdown-item" onClick={logout}><i className="bi bi-door-open-fill"></i>&ensp;Deslogar</a></li>
                         </ul>
                     </div>
                 )}

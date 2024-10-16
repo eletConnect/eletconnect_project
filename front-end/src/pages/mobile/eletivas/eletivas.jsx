@@ -43,11 +43,12 @@ export default function MHome() {
         if (inscricoesEncerradas) return;
 
         try {
-            const { data, status } = await axios.post('/m/eletivas/listar', { instituicao: aluno.instituicao });
+            const { data, status } = await axios.post('/m/eletivas/listar', { instituicao: aluno.instituicao, matricula: aluno.matricula });
             if (status === 200 && data.eletivas) {
                 const eletivasFormatadas = data.eletivas.map(eletiva => ({
                     ...eletiva,
                     professor: Array.isArray(eletiva.professor) ? eletiva.professor.join(', ') : eletiva.professor || 'N/A',
+                    matriculado: data.matriculas ? data.matriculas.some(e => e.codigo_eletiva === eletiva.codigo) : false
                 }));
                 setEletivas(eletivasFormatadas);
             } else {
@@ -58,7 +59,7 @@ export default function MHome() {
         } finally {
             setCarregando(false);
         }
-    }, [aluno.instituicao, inscricoesEncerradas]);
+    }, [aluno.instituicao, aluno.matricula, inscricoesEncerradas]);
 
     useEffect(() => {
         buscarPeriodo();
@@ -144,13 +145,33 @@ export default function MHome() {
             });
             if (response.status === 201) {
                 showToast('success', 'Matrícula realizada com sucesso!');
+                listarEletivas(); // Recarrega a lista para atualizar o estado
             } else {
                 throw new Error('Falha ao realizar matrícula.');
             }
         } catch (error) {
             showToast('danger', error.response?.data?.mensagem || 'Erro ao participar da eletiva!');
         }
-    }, [abaSelecionada, aluno, inscricoesEncerradas]);
+    }, [abaSelecionada, aluno, inscricoesEncerradas, listarEletivas]);
+
+    const desmatricularEletiva = useCallback(async (codigo) => {
+        try {
+            const response = await axios.post('/eletivas/desmatricular-aluno', {
+                codigo,
+                matricula: aluno.matricula,
+                instituicao: aluno.instituicao,
+                tipo: abaSelecionada
+            });
+            if (response.status === 200) {
+                showToast('success', 'Desmatrícula realizada com sucesso!');
+                listarEletivas(); // Recarrega a lista para atualizar o estado
+            } else {
+                throw new Error('Falha ao realizar desmatrícula.');
+            }
+        } catch (error) {
+            showToast('danger', error.response?.data?.mensagem || 'Erro ao desmatricular da eletiva!');
+        }
+    }, [abaSelecionada, aluno, listarEletivas]);
 
     const exibirAbaTrilha = useMemo(() => aluno.serie?.charAt(0) !== '1', [aluno.serie]);
 
@@ -163,14 +184,13 @@ export default function MHome() {
     return (
         <>
             <MHeader />
-            {/* Ajuste de layout para que o conteúdo principal comece abaixo do cabeçalho */}
             <main
                 id="mMain"
                 className="d-flex flex-column align-items-center pt-2 position-relative"
                 style={{
-                    paddingBottom: '5em', // Espaço para rodapé
+                    paddingBottom: '5em',
                     overflowY: 'auto',
-                    minHeight: 'calc(100vh - 4.5em - 5em)' // Calcula a altura correta entre cabeçalho e rodapé
+                    minHeight: 'calc(100vh - 4.5em - 5em)'
                 }}
             >
                 {carregando ? (
@@ -245,9 +265,15 @@ export default function MHome() {
                                             <div className="accordion-body">
                                                 {eletiva.descricao}
                                                 <div className='text-end'>
-                                                    <button className='btn btn-success' onClick={() => matricularEletiva(eletiva.codigo)} disabled={inscricoesEncerradas}>
-                                                        {inscricoesEncerradas ? 'Período Encerrado' : 'Matricular'}
-                                                    </button>
+                                                    {eletiva.matriculado ? (
+                                                        <button className='btn btn-danger' onClick={() => desmatricularEletiva(eletiva.codigo)} disabled={inscricoesEncerradas}>
+                                                            {inscricoesEncerradas ? 'Período Encerrado' : 'Desmatricular'}
+                                                        </button>
+                                                    ) : (
+                                                        <button className='btn btn-success' onClick={() => matricularEletiva(eletiva.codigo)} disabled={inscricoesEncerradas}>
+                                                            {inscricoesEncerradas ? 'Período Encerrado' : 'Matricular'}
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>

@@ -16,7 +16,7 @@ export default function Settings() {
     }, []);
 
     const itemConfigs = [
-        { link: '/settings/admin', nome: 'Administração', icon: 'bi bi-gear-wide-connected', roles: ['ADMIN', 'Diretor'] },
+        { link: '/settings/admin', nome: 'Administração', icon: 'bi bi-gear-wide-connected', roles: ['ADMIN'] },
         { link: '/settings/profile', nome: 'Perfil', icon: 'bi bi-person-badge', component: <EditarPerfil />, roles: ['ADMIN', 'Diretor', 'Coordenador', 'Professor', 'Colaborador'] },
         { link: '/settings/security', nome: 'Segurança', icon: 'bi bi-shield-lock', component: <EditarSenha />, roles: ['ADMIN', 'Diretor', 'Coordenador', 'Professor', 'Colaborador'] },
         { link: '/settings/institution/edit', nome: 'Instituição', icon: 'bi bi-house-gear', component: <EditarInstituicao />, roles: ['ADMIN', 'Diretor', 'Coordenador'] },

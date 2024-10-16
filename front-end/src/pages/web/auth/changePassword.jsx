@@ -12,7 +12,7 @@ export default function Home() {
     }, [user]);
 
     const [id] = useState(user?.id || '');
-    const [username, setUsername] = useState(user?.username || '');  
+    const [username, setUsername] = useState(user?.username || '');
     const [senhaAtual, setSenhaAtual] = useState('');
     const [novaSenha, setNovaSenha] = useState('');
     const [confirmarSenha, setConfirmarSenha] = useState('');
@@ -33,7 +33,7 @@ export default function Home() {
 
         setLoading(true);
         try {
-            const response = await axios.post('/auth/update-password', { id, senhaAtual, novaSenha });
+            const response = await axios.post('/auth/change-password', { id, senhaAtual, novaSenha });
             if (response.status === 200) {
                 showToast('success', 'Senha alterada com sucesso.');
                 setSenhaAtual('');
@@ -41,7 +41,7 @@ export default function Home() {
                 setConfirmarSenha('');
             }
         } catch (error) {
-            showToast('danger', error.response ? error.response.data.mensagem : 'Erro ao atualizar a senha.');
+            showToast('danger', error.response.data.mensagem); 
         } finally {
             setLoading(false);
         }
@@ -69,7 +69,7 @@ export default function Home() {
                 </div>
                 <div className='text-end pt-4'>
                     <button type='submit' className="btn btn-success" disabled={loading}>
-                    <i className="bi bi-key-fill"></i>&ensp;{loading ? 'Alterando...' : 'Alterar senha'}
+                        <i className="bi bi-key-fill"></i>&ensp;{loading ? 'Alterando...' : 'Alterar senha'}
                     </button>
                 </div>
             </form>

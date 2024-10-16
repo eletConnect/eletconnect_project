@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import axios from '../../../configs/axios';
 import Header from '../../../components/header';
 import showToast from '../../../utills/toasts';
@@ -10,8 +10,8 @@ import '../../../assets/styles/my-bootstrap.css';
 export default function GerenciarEletiva() {
     const [searchParams] = useSearchParams();
     const codigoEletiva = searchParams.get('code');
-
     const user = JSON.parse(sessionStorage.getItem('user'));
+    const navigate = useNavigate();
 
     const [carregando, setCarregando] = useState({ geral: true, modal: false });
     const [eletiva, setEletiva] = useState({});
@@ -33,8 +33,8 @@ export default function GerenciarEletiva() {
 
         const carregarDadosEletiva = async () => {
             try {
-                await buscarDetalhesEletiva(user);
-                await listarAlunosMatriculados(user);
+                await buscarDetalhesEletiva();
+                await listarAlunosMatriculados();
             } catch (error) {
                 showToast('danger', error.response?.data?.mensagem || 'Erro ao carregar dados da eletiva.');
             } finally {
@@ -51,7 +51,7 @@ export default function GerenciarEletiva() {
         }
     }, [mostrarOutrasTurmas, eletiva]);
 
-    const buscarDetalhesEletiva = async (user) => {
+    const buscarDetalhesEletiva = async () => {
         try {
             const { data } = await axios.post('/eletivas/buscar', { instituicao: user.instituicao, codigo: codigoEletiva });
             const detalhes = data.find(e => e.codigo === codigoEletiva);
@@ -63,12 +63,10 @@ export default function GerenciarEletiva() {
         }
     };
 
-    const listarAlunosMatriculados = async (user) => {
+    const listarAlunosMatriculados = async () => {
         try {
             const { data } = await axios.post('/eletivas/listar-alunos-eletiva', { instituicao: user.instituicao, codigo: codigoEletiva });
-
             const alunosOrdenados = (data || []).sort((a, b) => a.nome.localeCompare(b.nome));
-
             setAlunosMatriculados(alunosOrdenados);
             setAlunosMatriculadosOriginais(alunosOrdenados);
         } catch (error) {
@@ -82,15 +80,13 @@ export default function GerenciarEletiva() {
             const { data } = await axios.post('/estudantes/listar', { instituicao: user.instituicao });
 
             if (data?.alunosData) {
-                let alunosDisponiveis = data.alunosData
-                    .filter(aluno => !alunosMatriculados.some(a => a.matricula === aluno.matricula));
+                let alunosDisponiveis = data.alunosData.filter(aluno => !alunosMatriculados.some(a => a.matricula === aluno.matricula));
 
                 if (eletiva.exclusiva && !mostrarOutrasTurmas) {
                     alunosDisponiveis = alunosDisponiveis.filter(aluno => aluno.serie === eletiva.serie && aluno.turma === eletiva.turma);
                 }
 
                 alunosDisponiveis.sort((a, b) => a.nome.localeCompare(b.nome));
-
                 setTodosAlunos(alunosDisponiveis);
                 setTodosAlunosOriginais(alunosDisponiveis);
             }
@@ -112,7 +108,6 @@ export default function GerenciarEletiva() {
                 aluno.nome.toLowerCase().includes(termo) ||
                 aluno.matricula.toLowerCase().includes(termo)
             );
-
             alunosFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
             setAlunosMatriculados(alunosFiltrados);
         }
@@ -129,20 +124,13 @@ export default function GerenciarEletiva() {
                 aluno.nome.toLowerCase().includes(termoMatricula) ||
                 aluno.matricula.toLowerCase().includes(termoMatricula)
             );
-
             alunosFiltrados.sort((a, b) => a.nome.localeCompare(b.nome));
             setTodosAlunos(alunosFiltrados);
         }
     };
 
     const handleSelecaoAluno = (matricula) => {
-        setAlunosSelecionados((prev) => {
-            if (prev.includes(matricula)) {
-                return prev.filter(m => m !== matricula);
-            } else {
-                return [...prev, matricula];
-            }
-        });
+        setAlunosSelecionados(prev => prev.includes(matricula) ? prev.filter(m => m !== matricula) : [...prev, matricula]);
     };
 
     const matricularAlunos = async () => {
@@ -175,7 +163,12 @@ export default function GerenciarEletiva() {
         if (!user || !alunoSelecionado.matricula) return;
 
         try {
-            const resposta = await axios.post('/eletivas/desmatricular-aluno', { instituicao: user.instituicao, codigo: codigoEletiva, matricula: alunoSelecionado.matricula, tipo: eletiva.tipo });
+            const resposta = await axios.post('/eletivas/desmatricular-aluno', {
+                instituicao: user.instituicao,
+                codigo: codigoEletiva,
+                matricula: alunoSelecionado.matricula,
+                tipo: eletiva.tipo
+            });
             if (resposta.status === 200) {
                 showToast('success', `O(a) aluno(a) <b>${alunoSelecionado.nome}</b> foi removido(a) da eletiva.`);
                 setAlunosMatriculados(prev => prev.filter(a => a.matricula !== alunoSelecionado.matricula));
@@ -186,6 +179,18 @@ export default function GerenciarEletiva() {
         }
     };
 
+    const excluirEletiva = async (e) => {
+        e.preventDefault();
+        try {
+            const resposta = await axios.post('/eletivas/excluir', { codigo: codigoEletiva, instituicao: user.instituicao, tipo: eletiva.tipo });
+            if (resposta.status === 200) {
+                showToast('success', 'Eletiva excluída com sucesso!');
+                setTimeout(() => navigate('/electives'), 2000);
+            }
+        } catch (error) {
+            showToast('danger', error.response.data.mensagem);
+        }
+    };
     return (
         <>
             <div id='toast-container' className="toast-container position-fixed bottom-0 end-0 p-3"></div>
@@ -205,11 +210,14 @@ export default function GerenciarEletiva() {
                                     <Link to={"/electives"} className='btn btn-outline-secondary'>
                                         <i className="bi bi-arrow-return-left"></i>&ensp;Voltar
                                     </Link>
-                                    <button className='btn btn-outline-secondary' data-bs-toggle="modal" data-bs-target="#editarEletiva">
-                                        <i className="bi bi-pencil-fill"></i>&ensp;Editar
-                                    </button>
                                     <button className='btn btn-outline-secondary' data-bs-toggle="modal" data-bs-target="#gerarLista">
                                         <i className="bi bi-file-earmark-ruled"></i>&ensp;Gerar lista
+                                    </button>
+                                    <button className='btn btn-outline-success' data-bs-toggle="modal" data-bs-target="#editarEletiva">
+                                        <i className="bi bi-pencil-fill"></i>&ensp;Editar
+                                    </button>
+                                    <button className='btn btn-outline-danger' data-bs-toggle="modal" data-bs-target="#excluirEletiva">
+                                        <i className="bi bi-trash-fill"></i>&ensp;Excluir
                                     </button>
                                 </div>
                             )}
@@ -465,6 +473,34 @@ export default function GerenciarEletiva() {
                             {/* Componente ListaChamada Renderizado dentro do Modal */}
                             <ChamadaComImpressao />
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Modal: Excluir Eletiva */}
+            <div className="modal fade" id="excluirEletiva" tabIndex="-1" aria-labelledby="excluirEletivaLabel" aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <div className="d-flex align-items-center gap-2">
+                                <span className='d-flex align-items-center gap-2'>
+                                    <i className="bi bi-journal-bookmark-fill fs-3"></i>
+                                    <h4 className='m-0 fs-4'>Eletivas</h4>
+                                </span>
+                                <i className="bi bi-arrow-right-short fs-4"></i>
+                                <h5 className="m-0">Excluir</h5>
+                            </div>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form onSubmit={excluirEletiva}>
+                            <div className="modal-body">
+                                <p>Tem certeza de que deseja excluir a eletiva <b>{eletiva.nome}</b> Esta ação não poderá ser desfeita e todos os dados relacionados a esta eletiva serão <u>permanentemente</u> removidos.</p>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type='submit' className='btn btn-danger' data-bs-dismiss="modal"><i className="bi bi-trash3-fill"></i>&ensp;Excluir</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

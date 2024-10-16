@@ -313,25 +313,56 @@ export default function Colaboradores() {
                                         </table>
                                     </div>
                                     <nav aria-label="Page navigation example" className='d-flex align-items-center justify-content-between'>
-                                        <div className="text-center">
-                                            Mostrando {obterIntervaloAtual()} de {filteredAndSortedData.length} resultados
-                                        </div>
-                                        <ul className="pagination justify-content-end">
-                                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                                <button className="page-link" onClick={paginacaoAnterior}>Anterior</button>
-                                            </li>
-                                            {paginasVisiveis().map((numeroPagina) => (
-                                                <li key={numeroPagina} className={`page-item ${currentPage === numeroPagina ? 'active' : ''}`}>
-                                                    <button className="page-link" onClick={() => setCurrentPage(numeroPagina)}>
-                                                        {numeroPagina}
-                                                    </button>
-                                                </li>
-                                            ))}
-                                            <li className={`page-item ${currentPage === totalPaginas ? 'disabled' : ''}`}>
-                                                <button className="page-link" onClick={paginacaoProxima}>Próximo</button>
-                                            </li>
-                                        </ul>
-                                    </nav>
+    <div className="text-center">
+        Mostrando {obterIntervaloAtual()} de {filteredAndSortedData.length} resultados
+    </div>
+    <ul className="pagination justify-content-end">
+        <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+            <button className="page-link" onClick={paginacaoAnterior}>
+                &laquo; Anterior
+            </button>
+        </li>
+        {totalPaginas > 0 && (
+            <li className={`page-item ${currentPage === 1 ? 'active' : ''}`}>
+                <button className="page-link" onClick={() => setCurrentPage(1)}>
+                    1
+                </button>
+            </li>
+        )}
+        {currentPage > 3 && (
+            <li className="page-item disabled">
+                <span className="page-link">...</span>
+            </li>
+        )}
+        {paginasVisiveis().map((numeroPagina) =>
+            numeroPagina !== 1 && numeroPagina !== totalPaginas ? (
+                <li key={numeroPagina} className={`page-item ${currentPage === numeroPagina ? 'active' : ''}`}>
+                    <button className="page-link" onClick={() => setCurrentPage(numeroPagina)}>
+                        {numeroPagina}
+                    </button>
+                </li>
+            ) : null
+        )}
+        {currentPage < totalPaginas - 2 && (
+            <li className="page-item disabled">
+                <span className="page-link">...</span>
+            </li>
+        )}
+        {totalPaginas > 1 && (
+            <li className={`page-item ${currentPage === totalPaginas ? 'active' : ''}`}>
+                <button className="page-link" onClick={() => setCurrentPage(totalPaginas)}>
+                    {totalPaginas}
+                </button>
+            </li>
+        )}
+        <li className={`page-item ${currentPage === totalPaginas ? 'disabled' : ''}`}>
+            <button className="page-link" onClick={paginacaoProxima}>
+                Próximo &raquo;
+            </button>
+        </li>
+ 
+    </ul>
+</nav>
                                 </>
                             )}
                         </div>

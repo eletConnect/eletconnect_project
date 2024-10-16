@@ -132,7 +132,7 @@ export default function EditarAluno({ matricula }) {
         <>
             <div id="toast-container" className="toast-container position-absolute bottom-0 start-50 translate-middle-x"></div>
             <div className="p-4">
-                {(carregando || carregandoEletivas) ? ( 
+                {(carregando || carregandoEletivas) ? (
                     <div className="d-flex justify-content-center my-5">
                         <div className="spinner-border text-primary" role="status">
                             <span className="visually-hidden">Carregando...</span>
@@ -163,9 +163,12 @@ export default function EditarAluno({ matricula }) {
                                     <label htmlFor="turma" className="form-label">Turma <span className="text-danger">*</span></label>
                                     <select className="form-select" id="turma" value={dadosAluno.turma} onChange={(e) => setDadosAluno({ ...dadosAluno, turma: e.target.value })} required>
                                         <option value="" disabled>Selecione...</option>
-                                        {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].map(turma => (
-                                            <option key={turma} value={turma}>{turma}</option>
-                                        ))}
+                                        {[...Array(26)].map((_, i) => {
+                                            const turma = String.fromCharCode(65 + i); // 65 é o código ASCII para 'A'
+                                            return (
+                                                <option key={turma} value={turma}>{turma}</option>
+                                            );
+                                        })}
                                     </select>
                                 </div>
                                 <div className="col-md-3">
@@ -202,7 +205,7 @@ export default function EditarAluno({ matricula }) {
                     </div>
                 )}
 
-                {!carregando && !carregandoEletivas && ( 
+                {!carregando && !carregandoEletivas && (
                     <div className="text-end">
                         <button className="btn btn-success" onClick={aoSalvar} disabled={salvando}>
                             <i className='bi bi-pencil-fill'></i>&ensp;{salvando ? 'Editando...' : 'Editar'}

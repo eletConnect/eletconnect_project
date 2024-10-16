@@ -34,6 +34,7 @@ export default function Header() {
         { path: '/students', label: 'Estudantes', icon: 'bi bi-person-arms-up', roles: ['ADMIN', 'Diretor', 'Coordenador', 'Professor'] },
         { path: '/electives', label: 'Eletivas', icon: 'bi bi-journal-bookmark-fill', roles: ['ADMIN', 'Diretor', 'Coordenador'] },
         { path: '/settings', label: 'Configurações', icon: 'bi bi-gear-fill', roles: ['ADMIN', 'Diretor', 'Coordenador', 'Professor', 'Colaborador'] },
+        { path: '/help', label: 'Ajuda', icon: 'bi bi-info-square', roles: ['ADMIN', 'Diretor', 'Coordenador', 'Professor', 'Colaborador'] }
     ];
 
     const filteredMenuItems = menuItems.filter(item => item.roles.includes(user?.cargo));

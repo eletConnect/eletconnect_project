@@ -38,10 +38,10 @@ import MVerificacaoPage from "./pages/mobile/auth/verification";
 
 import MHomePage from "./pages/mobile/home/home";
 
+import MAvisos from "./pages/mobile/home/avisos";
+
 import MEletivasPage from "./pages/mobile/eletivas/eletivas";
 import MMinhasEletivasPage from "./pages/mobile/eletivas/minhasEletivas";
-
-import MConfiguracoesPage from "./pages/mobile/configs/settings";
 
 // -- Definir Constantes para Cargos --
 const CARGOS_WEB = ['Diretor', 'Coordenador', 'Professor', 'Colaborador'];
@@ -85,9 +85,9 @@ const rotas = createBrowserRouter([
 
     // Páginas MOBILE
     rotaProtegida('/m/home', <MHomePage />, CARGOS_MOBILE),
+    rotaProtegida('/m/warnings', <MAvisos />, CARGOS_MOBILE),
     rotaProtegida('/m/electives', <MEletivasPage />, CARGOS_MOBILE),
     rotaProtegida('/m/my-electives', <MMinhasEletivasPage />, SOMENTE_ALUNO),
-    rotaProtegida('/m/settings', <MConfiguracoesPage />, CARGOS_MOBILE),
 
     // Páginas de Autenticação MOBILE
     { path: '/m/login', element: <MLoginPage /> },

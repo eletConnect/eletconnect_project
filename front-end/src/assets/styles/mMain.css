@@ -62,3 +62,8 @@ a {
     font-weight: bold;
     color: #0a2558;
 }
+
+.black-carousel-control .carousel-control-prev-icon,
+.black-carousel-control .carousel-control-next-icon {
+    background-color: black;
+}
