@@ -53,7 +53,7 @@ export default function ModalRedefinirSenha({ alunoSelecionado }) {
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
               <button type="submit" className="btn btn-primary" disabled={enviando || !alunoSelecionado}>
-                {enviando ? 'Redefinindo...' : <><i className="bi bi-key-fill"></i>&ensp;Redefinir</>}
+                {enviando ? <><span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Redefinindo...</> : <><i className="bi bi-key-fill"></i>&ensp;Redefinir</>}
               </button>
             </div>
           </form>

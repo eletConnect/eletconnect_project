@@ -145,8 +145,15 @@ export default function ModalCadastrarPlanilha({ escola }) {
                 <div className={`modal-dialog ${loading || dados.length > 0 ? 'modal-dialog-scrollable modal-xl' : ''}`}>
                     <div className="modal-content">
                         <div className="modal-header">
-                            <h4 className="m-0 fs-4">Cadastrar via Planilha</h4>
-                            <button type="button" className="btn-close" onClick={() => window.location.reload()}></button>
+                            <div className="d-flex align-items-center gap-2">
+                                <span className="d-flex align-items-center gap-2">
+                                    <i className="bi bi-person-arms-up fs-3"></i>
+                                    <h4 className="m-0 fs-4">Estudantes</h4>
+                                </span>
+                                <i className="bi bi-arrow-right-short fs-4"></i>
+                                <h5 className="m-0">Cadastrar via <b className='text-success'>Planilha</b></h5>
+                            </div>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div className="modal-body">
                             <input type="file" className="form-control" accept=".xls,.xlsx,.csv" onChange={handleFileUpload} />
@@ -222,8 +229,15 @@ export default function ModalCadastrarPlanilha({ escola }) {
                 <div className={`modal-dialog ${erros && Object.keys(erros).length > 0 ? 'modal-lg modal-dialog-scrollable' : ''}`}>
                     <div className="modal-content">
                         <div className="modal-header">
-                            <h4 className="m-0 fs-4">Confirmar Cadastro</h4>
-                            <button type="button" className="btn-close" onClick={() => window.location.reload()}></button>
+                            <div className="d-flex align-items-center gap-2">
+                                <span className="d-flex align-items-center gap-2">
+                                    <i className="bi bi-person-arms-up fs-3"></i>
+                                    <h4 className="m-0 fs-4">Estudantes</h4>
+                                </span>
+                                <i className="bi bi-arrow-right-short fs-4"></i>
+                                <h5 className="m-0">Cadastrar via <b className='text-success'>Planilha</b></h5>
+                            </div>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div className="modal-body">
                             {Object.keys(erros).length > 0 ? (
@@ -265,23 +279,11 @@ export default function ModalCadastrarPlanilha({ escola }) {
                                 {/* Renderizar o botão de cadastrar somente se não houver erros */}
                                 {Object.keys(erros).length === 0 && (
                                     <button className="btn btn-primary" onClick={cadastrarPlanilha} disabled={enviando}>
-                                        {enviando ? (
-                                            <>
-                                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                                Cadastrando...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <i className="bi bi-person-add"></i>&ensp;Cadastrar
-                                            </>
-                                        )}
+                                        {enviando ? <><span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Cadastrando...</> : <><i className="bi bi-person-add"></i>&ensp;Cadastrar</>}
                                     </button>
                                 )}
                             </div>
                         </div>
-
-
-
                     </div>
                 </div>
             </div>

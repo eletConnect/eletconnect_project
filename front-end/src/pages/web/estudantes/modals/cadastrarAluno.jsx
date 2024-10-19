@@ -150,7 +150,7 @@ export default function ModalCadastrarAluno({ escola }) {
                 Cancelar
               </button>
               <button type="submit" className="btn btn-primary" disabled={enviando}>
-                {enviando ? 'Enviando...' : <><i className="bi bi-person-add"></i>&ensp;Cadastrar</>}
+                {enviando ? <><span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Cadastrando...</> : <><i className="bi bi-person-add"></i>&ensp;Cadastrar</>}
               </button>
             </div>
           </form>
