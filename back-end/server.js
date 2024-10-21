@@ -3,10 +3,10 @@ const express = require('express');
 const session = require('express-session');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
-const morgan = require('morgan');
 const cors = require('cors');
 const path = require('path');
 const os = require('os');
+// const morgan = require('morgan'); // Se quiser habilitar logs, descomente esta linha
 
 const app = express();
 
@@ -27,7 +27,6 @@ function obterEnderecoIPLocal() {
 }
 
 const IPLocal = obterEnderecoIPLocal();
-// console.log('Endereço IP local:', IPLocal); // Comentado para não aparecer no log
 
 // Configuração do CORS
 app.use(cors({
@@ -39,17 +38,24 @@ app.use(cors({
 }));
 
 // Middlewares básicos
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Aumentar o limite do body-parser para 10MB
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
 // app.use(morgan('dev')); // Se deseja remover logs de requisição, comente ou remova esta linha
 
 // Segurança básica com cabeçalhos HTTP
 app.use(helmet());
+app.use(helmet({
+  frameguard: {
+    action: 'deny'
+  }
+}));
 
 // Limitação de requisições por IP para prevenir abusos
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 10000,
+  max: 10000, // Limite de 10.000 requisições por IP
 });
 app.use(limiter);
 
@@ -59,7 +65,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // `false` para desenvolvimento em HTTP
+    secure: false, // `false` para desenvolvimento em HTTP. Em produção, mudar para `true`
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 horas
   },
@@ -67,7 +73,6 @@ app.use(session({
 
 // Log da sessão para depuração
 app.use((req, res, next) => {
-  // console.log('Sessão:', req.session); // Comentado para não aparecer no log
   next();
 });
 
@@ -103,5 +108,5 @@ app.use((err, req, res, next) => {
 
 // Inicialização do servidor
 app.listen(PORT, HOST, () => {
-  console.warn(`Servidor rodando em http://${IPLocal}:${PORT} (ou http://localhost:${PORT})`); // Comentado para não aparecer no log
+  console.warn(`Servidor rodando em http://${IPLocal}:${PORT} (ou http://localhost:${PORT})`);
 });
